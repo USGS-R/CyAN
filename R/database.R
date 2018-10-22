@@ -232,7 +232,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
   }
   if(!(is.null(parameters))) {
-    output <- dplyr::filter(output, PARAMETER_NAME %in% parameters)
+    output <- dplyr::filter(output, PARAMETER_ID %in% parameters)
   }
   if(!(is.null(minimum_tier))) {
     output <- dplyr::filter(output, TIER >= minimum_tier)
@@ -250,3 +250,62 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
 }
 
+
+#' Find simaltaneous measurements of two parameters
+#'
+#' Find sampling activities that have associated measurements of two parameters
+#' of interest - helpful for bivariate plotting/ investigating the relationship
+#' between two parameters.
+#'
+#' @param cyan_connection a CyAN database connection from \code{connect_cyan}
+#'
+#' @param parameter_1,parameter_2 CyAN parameter codes for the two parameters
+#' of interest
+#'
+#' @param collect a logical indicating whether the query will be pulled into
+#' a local tibble using dbplyr::collect. If you are planning on doing further
+#' selection or filtering, you may want not want to collect until you're ready
+#'
+#' @param north_latitude,south_latitude numbers indicating the northern most
+#' and sothern most latitude that will be included in the query. Latitude
+#' should be given as a positive number of degrees north of the equator.
+#'
+#' @param west_longitude,east_longitude nunbers indicating the western most
+#' and eastern most latitude that will be included in the query. Longitude
+#' should be given as a negative number of decimal degrees west of the prime
+#' meridian.
+#'
+#' @param start_date,end_date dates can be given as character strings in the
+#' form "yyyy-mm-dd" or as Date objects
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+
+get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
+                          collect = FALSE,
+                          north_latitude = NULL, south_latitude = NULL,
+                          west_longitude = NULL, east_longitude = NULL,
+                          start_date = NULL, end_date = NULL) {
+
+  all_data <- get_cyan_data(cyan_connection, north_latitude = north_latitude,
+                            south_latitude = south_latitude,
+                            east_longitude = east_longitude,
+                            west_longitude = west_longitude,
+                            start_date = start_date, end_date = end_date,
+                            parameters = c(parameter_1, parameter_2))
+  parameter_1_data <- all_data %>%
+    filter(PARAMETER_ID == !!parameter_1)
+  parameter_2_data <- all_data %>%
+    filter(PARAMETER_ID == !!parameter_2)
+
+  plot_data <- inner_join(parameter_1_data, parameter_2_data,
+                          by = c("ACTIVITY_ID", "DEPTH", "DEPTH_UNIT"),
+                          suffix = c(".1", ".2"))
+
+  if(collect)
+    plot_data <- collect(plot_data)
+
+  return(plot_data)
+
+}
