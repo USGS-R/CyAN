@@ -31,6 +31,13 @@ meridian.}
 \item{start_date, end_date}{dates can be given as character strings in the
 form "yyyy-mm-dd" or as Date objects}
 }
+\value{
+if collect is FALSE, the query will be generated, but not collected.
+See the documentation on \code{collect} for details. Otherwise, if collect
+is TRUE, the query will be pulled into memory and returned as a tibble.
+Returns a wide data frame, with a shared activity, depth, and depth_unit
+columns, and all other columns suffixed with .1 or .2 for the two parameters.
+}
 \description{
 Find sampling activities that have associated measurements of two parameters
 of interest - helpful for bivariate plotting/ investigating the relationship
