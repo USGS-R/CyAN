@@ -278,6 +278,12 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #' @param start_date,end_date dates can be given as character strings in the
 #' form "yyyy-mm-dd" or as Date objects
 #'
+##' @return if collect is FALSE, the query will be generated, but not collected.
+#' See the documentation on \code{collect} for details. Otherwise, if collect
+#' is TRUE, the query will be pulled into memory and returned as a tibble.
+#' Returns a wide data frame, with a shared activity, depth, and depth_unit
+#' columns, and all other columns suffixed with .1 or .2 for the two parameters.
+#'
 #' @importFrom magrittr %>%
 #'
 #' @export
@@ -307,5 +313,32 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
     plot_data <- dplyr::collect(plot_data)
 
   return(plot_data)
+
+}
+
+#' Find results with a particular flag
+#'
+#' Check the QCFLAGS table to find results that have been flagged with
+#' the given flag code
+#'
+#' @param cyan_connection a CyAN database connection from \code{connect_cyan}
+#'
+#' @param flag_code the flag code of interest
+#'
+#' @return a vector of result_ids with the given flag
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+
+find_flagged <- function(cyan_connection, flag_code) {
+
+  FLAG_CODE <- ".dplyr.var"
+
+  flags <- dplyr::tbl(cyan_connection, "QCFLAGS") %>%
+    dplyr::filter(FLAG_CODE == flag_code) %>%
+    pull(RESULT_ID)
+
+  return(flags)
 
 }
