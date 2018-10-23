@@ -337,7 +337,7 @@ find_flagged <- function(cyan_connection, flag_code) {
 
   flags <- dplyr::tbl(cyan_connection, "QCFLAGS") %>%
     dplyr::filter(FLAG_CODE == flag_code) %>%
-    pull(RESULT_ID)
+    dplyr::pull(RESULT_ID)
 
   return(flags)
 
