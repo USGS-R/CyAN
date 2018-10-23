@@ -295,16 +295,16 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                             start_date = start_date, end_date = end_date,
                             parameters = c(parameter_1, parameter_2))
   parameter_1_data <- all_data %>%
-    filter(PARAMETER_ID == !!parameter_1)
+    dplyr::filter(PARAMETER_ID == parameter_1)
   parameter_2_data <- all_data %>%
-    filter(PARAMETER_ID == !!parameter_2)
+    dplyr::filter(PARAMETER_ID == parameter_2)
 
-  plot_data <- inner_join(parameter_1_data, parameter_2_data,
+  plot_data <- dplyr::inner_join(parameter_1_data, parameter_2_data,
                           by = c("ACTIVITY_ID", "DEPTH", "DEPTH_UNIT"),
                           suffix = c(".1", ".2"))
 
   if(collect)
-    plot_data <- collect(plot_data)
+    plot_data <- dplyr::collect(plot_data)
 
   return(plot_data)
 
