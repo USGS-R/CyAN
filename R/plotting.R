@@ -16,7 +16,8 @@
 #' be plotted with an x symbol rather than a filled circle
 #'
 #' @param range_1,range_2 numeric vectors specifiying the range for
-#' values in parameter 1 and parameter 2, respectively
+#' values in parameter 1 and parameter 2, respectively. The minimum
+#' should be given first, followed by the maximum.
 #'
 #' @importFrom magrittr %>%
 #'
@@ -26,6 +27,27 @@ plot_bivariate <- function(plot_data,
                            log_1 = FALSE, log_2 = FALSE,
                            method_highlight = NULL, flagged_results = NULL,
                            range_1 = NULL, range_2 = NULL) {
+
+  if(!all(is.logical(c(log_1, log_2))))
+    stop("log_1 and log_2 should be TRUE/FALSE")
+
+  if(!is.null(flagged_results)) {
+    if(!is.numeric(flagged_results))
+      stop("flagged_results should be a numeric vector")
+  }
+
+  if(!is.null(range_1)) {
+    if(!is.numeric(range_1))
+      stop("range_1 should be numeric")
+    if(length(range_1) != 2)
+      stop("range_1 should be length 2")
+  }
+  if(!is.null(range_2)) {
+    if(!is.numeric(range_2))
+      stop("range_2 should be numeric")
+    if(length(range_1) != 2)
+      stop("range_2 should be length 2")
+  }
 
   if(nrow(plot_data > 10000)) {
     warning("plot_data contains more than 10,000 rows and will be truncated")
