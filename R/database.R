@@ -105,8 +105,7 @@ generate_parameter_index <- function(cyan_connection) {
 #' should be given as a negative number of decimal degrees west of the prime
 #' meridian.
 #'
-#' @param start_date,end_date dates can be given as character strings in the
-#' form "yyyy-mm-dd" or as Date objects
+#' @param years numeric vector of years that will be included in the query
 #'
 #' @param parameters a character vector of parameter names that will be
 #' returned in the query
@@ -130,36 +129,31 @@ generate_parameter_index <- function(cyan_connection) {
 get_cyan_data <- function(cyan_connection, collect = FALSE,
                           north_latitude = NULL, south_latitude = NULL,
                           west_longitude = NULL, east_longitude = NULL,
-                          start_date = NULL, end_date = NULL,
+                          years = NULL,
                           parameters = NULL,
                           minimum_tier = NULL,
                           states  = NULL) {
 
-  LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
-    STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
-    DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID.PARAMETER <-
-    LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
-    TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
-    STATECODE <- ".dplyr.var"
+  # LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
+  #   STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
+  #   DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID.PARAMETER <-
+  #   LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
+  #   TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
+  #   STATECODE <- ".dplyr.var"
 
-  location <- dplyr::tbl(cyan_connection, "LOCATION")
-  activity <- dplyr::tbl(cyan_connection, "ACTIVITY")
-  result <- dplyr::tbl(cyan_connection, "RESULT")
-  parameter <- dplyr::tbl(cyan_connection, "PARAMETER")
-  method <- dplyr::tbl(cyan_connection, "METHOD")
-
-  output <- location %>%
-    dplyr::inner_join(activity, by = "LOCATION_ID", suffix = c(".LOCATION", ".ACTIVITY")) %>%
-    dplyr::inner_join(result, by = "ACTIVITY_ID", suffix = c(".ACTIVITY", ".RESULT")) %>%
-    dplyr::inner_join(parameter, by = "PARAMETER_ID", suffix = c(".RESULT", ".PARAMETER")) %>%
-    dplyr::inner_join(method, by = "METHOD_ID", suffix = c(".PARAMETER", ".METHOD")) %>%
-    dplyr::select(LOCATION_ID, LATITUDE.LOCATION, LONGITUDE.LOCATION, STARTDATE, STARTTIME,
-           ENDDATE, ENDTIME, TIMEZONE, SAMPLE_TYPE, DEPTH, DEPTH_UNIT,
-           VALUE, FLAG, PARAMETER_ID.PARAMETER, LOCALTZ, PARAMETER_NAME, UNITS,
-           ACTIVITY_ID, RESULT_ID, TIER, METHOD_ID, NOTE) %>%
-    dplyr::rename(LATITUDE = LATITUDE.LOCATION, LONGITUDE = LONGITUDE.LOCATION,
-           PARAMETER_ID = PARAMETER_ID.PARAMETER)
-
+  location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
+    dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, LOCATION_NAME, LOCALTZ)
+  activity <- dplyr::tbl(cyan_connection, "ACTIVITY") %>%
+    dplyr::select(ACTIVITY_ID, LOCATION_ID, STARTDATE, STARTTIME, ENDDATE, ENDTIME,
+           TIMEZONE, SAMPLE_TYPE) %>%
+    dplyr::mutate(YEAR = as.numeric(STRFTIME('%Y', STARTDATE)))
+  result <- dplyr::tbl(cyan_connection, "RESULT") %>%
+    dplyr::select(RESULT_ID, ACTIVITY_ID, VALUE, FLAG, PARAMETER_ID, METHOD_ID, DEPTH,
+           DEPTH_UNIT, TIER)
+  parameter <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
+    dplyr::select(PARAMETER_ID, PARAMETER_NAME, UNITS)
+  method <- dplyr::tbl(cyan_connection, "METHOD") %>%
+    dplyr::select(METHOD_ID, NOTE)
 
   if(!(is.null(north_latitude))) {
 
@@ -170,7 +164,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
       warning("given north_latitude is south of the contiguous 48 states")
     }
 
-    output <-  dplyr::filter(output, LATITUDE <= north_latitude)
+    location <- dplyr::filter(location, LATITUDE <= north_latitude)
 
   }
   if(!(is.null(south_latitude))) {
@@ -182,7 +176,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
       warning("given south_latitude is north of the contiguous 48 states")
     }
 
-    output <-  dplyr::filter(output, LATITUDE >= south_latitude)
+    location <- dplyr::filter(location, LATITUDE >= south_latitude)
 
   }
   if(!(is.null(west_longitude))) {
@@ -194,7 +188,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
       warning("given west_longitude is east of the contiguous 48 states")
     }
 
-    output <- dplyr::filter(output, LONGITUDE >= west_longitude)
+    location <- dplyr::filter(location, LONGITUDE >= west_longitude)
 
   }
   if(!(is.null(east_longitude))) {
@@ -206,45 +200,46 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
       warning("given east_longitude is west of the contiguous 48 states")
     }
 
-    output <- dplyr::filter(output, LONGITUDE <= east_longitude)
+    location <- dplyr::filter(location, LONGITUDE <= east_longitude)
 
   }
-  if(!(is.null(start_date))) {
+  if(!(is.null(years))) {
 
-    if(class(start_date) != "Date") {
-      if(is.na(as.Date(start_date, format="%Y-%m-%d"))) {
-        stop("start_date isn't a date or a character string like yyyy-mm-dd")
-      }
+    if(!is.numeric(years)) {
+      stop("years should be a vector of integers")
     }
 
-    output <- dplyr::filter(output, STARTDATE >= start_date)
-
-  }
-  if(!(is.null(end_date))) {
-
-    if(class(end_date) != "Date") {
-      if(is.na(as.Date(end_date, format="%Y-%m-%d"))) {
-        stop("end_date isn't a date or a character string like yyyy-mm-dd")
-      }
-    }
-
-    output <- dplyr::filter(output, STARTDATE <= end_date)
+    activity <- dplyr::filter(activity, YEAR %in% years)
 
   }
   if(!(is.null(parameters))) {
-    output <- dplyr::filter(output, PARAMETER_ID %in% parameters)
+    result <- dplyr::filter(result, PARAMETER_ID %in% parameters)
   }
   if(!(is.null(minimum_tier))) {
-    output <- dplyr::filter(output, TIER >= minimum_tier)
+    result <- dplyr::filter(result, TIER >= minimum_tier)
   }
   if(!(is.null(states))) {
-    output <- dplyr::filter(output, STATECODE %in% states)
+    location <- dplyr::filter(location, STATECODE %in% states)
   }
 
   if(collect) {
     message("Collecting output")
-    output <- dplyr::collect(output)
+    location <- dplyr::collect(location)
+    activity <- dplyr::collect(activity)
+    result <- dplyr::collect(result)
+    parameter <- dplyr::collect(parameter)
+    method <- dplyr::collect(method)
   }
+
+  output <- location %>%
+    dplyr::inner_join(activity, by = "LOCATION_ID", suffix = c(".LOCATION", ".ACTIVITY")) %>%
+    dplyr::inner_join(result, by = "ACTIVITY_ID", suffix = c(".ACTIVITY", ".RESULT")) %>%
+    dplyr::inner_join(parameter, by = "PARAMETER_ID", suffix = c(".RESULT", ".PARAMETER")) %>%
+    dplyr::inner_join(method, by = "METHOD_ID", suffix = c(".PARAMETER", ".METHOD")) %>%
+    dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, STARTDATE, STARTTIME,
+                  ENDDATE, ENDTIME, TIMEZONE, SAMPLE_TYPE, DEPTH, DEPTH_UNIT,
+                  VALUE, FLAG, PARAMETER_ID, LOCALTZ, PARAMETER_NAME, UNITS,
+                  ACTIVITY_ID, RESULT_ID, TIER, METHOD_ID, NOTE)
 
   return(output)
 
@@ -340,5 +335,74 @@ find_flagged <- function(cyan_connection, flag_code) {
     dplyr::pull(RESULT_ID)
 
   return(flags)
+
+}
+
+#' Add a column of GMT time to a cyan data query
+#'
+#' Find GMT time given the sample time and local time zone
+#'
+#' @param cyan_data a data frame from \code{get_cyan_data} with
+#' \code{collect = TRUE}
+#'
+#' @return cyan_data with an additional character column for time in GMT
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+#'
+
+add_GMT_time <- function(cyan_data) {
+
+  output <- cyan_data %>%
+    dplyr::mutate(datetime = paste(STARTDATE, STARTTIME))
+  gmt_time <- vector(length = nrow(output))
+  for(i in 1:nrow(output)) {
+    gmt_time[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
+                                                   tz = output$TIMEZONE[i]), tz = "GMT")
+  }
+  #If any timezones are blank, don't output a GMT time
+  gmt_time[output$TIMEZONE == ""] <- NA
+  output$TIME_GMT <- gmt_time
+  output <- dplyr::select(output, -datetime)
+  return(output)
+
+}
+
+#' Add a logical column indicating whether the sample was taken during solar noon
+#'
+#' Solar noon is defined as 1000 - 1400, extended solar noon is defined as
+#' 0900 - 1500
+#'
+#' @param cyan_data a data frame from \code{get_cyan_data} with
+#' \code{collect = TRUE}
+#'
+#' @return cyan_data with two additional logical columns, solar_noon indicating
+#' if the sample was taken during solar noon and ext_solar_noon indicating if
+#' the sample was taken during extended solar noon.
+#'
+#' @export
+
+add_solar_noon <- function(cyan_data) {
+
+  output <- dplyr::mutate(cyan_data, datetime = paste(STARTDATE, STARTTIME))
+
+  hour <- vector(length = nrow(output))
+  for(i in 1:nrow(cyan_data)) {
+    hour[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
+                                               tz = output$TIMEZONE[i]),
+                            tz = output$LOCALTZ[i], format = "%H")
+  }
+  hour <- as.numeric(hour)
+  solar_noon <- hour %in% 10:13
+  ext_solar_noon <- hour %in% 9:14
+  solar_noon[output$TIMEZONE == "" | output$LOCALTZ == ""] <- NA
+  ext_solar_noon[output$TIMEZONE == "" | output$LOCALTZ == ""] <- NA
+
+  output$solar_noon <- solar_noon
+  output$ext_solar_noon <- ext_solar_noon
+
+  output <- dplyr::select(output, -datetime)
+  return(output)
 
 }
