@@ -1,4 +1,22 @@
 
+#' Start the CyAN app
+#'
+#' Launch the CyAN app in a browser
+#'
+#' @export
+#'
+
+CyAN <- function() {
+
+  app_dir <- system.file("shiny", "cyan-app", package = "CyAN")
+  if(app_dir == "") {
+    stop("Couldn't find app directory, try reinstalling the package")
+  }
+
+  shiny::runApp(appDir, launch.browser = TRUE)
+
+}
+
 #' Return a null value for an empty character string
 #'
 #' If x is a blank character vector, return null, otherwise make sure x is numeric

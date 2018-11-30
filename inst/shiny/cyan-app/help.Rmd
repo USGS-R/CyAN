@@ -1,0 +1,38 @@
+_This software is preliminary or provisional and is subject to revision. It is being provided to meet the need for timely best science. The software has not received final approval by the U.S. Geological Survey (USGS). No warranty, expressed or implied, is made by the USGS or the U.S. Government as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. The software is provided on the condition that neither the USGS nor the U.S. Government shall be held liable for any damages resulting from the authorized or unauthorized use of the software._
+
+## Introduction
+
+This application is intended to facilitate the exploration, download and management of lake and reservoir data related to harmful algal blooms. It is an R Shiny application built to interact with an SQLite database collecting data from various agencies and sources. This is only one way to interact with the database - the database within can be queried directly using standard SQL. See sqlite.org for more details.
+
+The rest of this page will describe the functionality and use of the app.
+
+## Map
+
+Each orange circle on the map represents a location that has at least one data point in the database. Clicking on a circle will give you the name of that sampling location. You can zooom and pan the map.
+
+### Filtering data points and changing the basemap
+
+The box at the upper right of the screen by default can be used to change which points are shown on the map. If you want to see only points that have chlorophyll-a data, for example, you would select that paramter from the drop down box. Selecting multiple parameters can give you either an inclusive or exclusive filter using the toggle buttons above the box.
+
+Beneath the fitlering controls, you can switch the basemap. The "NHD" layer shows waterbodies from the [USGS Hydro Cached Base Map Service](https://www.usgs.gov/news/new-hydro-map-service-available). LandsatLook is a Landsat derived product, a "composite of three bands to show a 'natural' looking (false color) image..." more information can be found [here](https://landsat.usgs.gov/landsatlook-images).
+
+### Downloading data
+
+The box on the left side of the screen can be used to download data. First enter the filename for your download, without an extension. All downloads are in .csv format. If you've zoomed into a part of the map that you are interested in, you can use that extent to limit your query by checking the "fill bounds from map" checkbox. You can also limit your query to particular years, parameters, states and quality tiers. You can add GMT time to your query. The solar noon flags will indicate whether the sample was taken at solar noon (10:00 - 14:00) or extended solar noon (09:00 - 15:00).
+
+## QC
+
+The QC tab has various options for interacting with the quality control sections of the datase. You can download flagged data or edit some flags in this tab. You can also view bivariate relationships.
+
+### Download flags
+
+The dropdown menu in this tab lists various checks that have been performed on the data. Selecting one and clicking "Download" will give you a file of data that has failed that check. You can also download data that has been manually flagged.
+
+### Bivariate
+
+This tab is used to view bivariate relationships between concurrently collected values of two different paramters. After you slelect a parameter for each axis, the plots will automatically begin to generate. By default, only points within your current map extent will be shown. You can change this by unchecking the "Limit to map bounds" box. You can change either axis to have a log scale using the "Log Scale" checkboxes second from the right. It can take a minute or two to generate this plot. To improve performance, the number of points displayed is limited to 10,000. If you have more points than that, you can move through them using the "Subset" dropdown box. You can highlight points analyzed using a particular method for either parameter using the "Highlight" and "Methods" boxes. Multiple methods can be selected.
+
+Once the plots are generated, you can click and drag on the left plot to zoom the right plot. To clear your zoom, you can single click anywhere on the left plot. If you want to select points to flag, click and drag a region on the right plot, enter your initials in the box and click "Flag selected". Those points will switch to an "X" symbol. If the points don't regenerate, just click "Flag selected" again. If you want to clear the flags you or someone else has applied, just select them and click "Clear flags". Again, you may have to click the button twice to get the points to update.
+
+
+
