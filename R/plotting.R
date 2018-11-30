@@ -87,11 +87,17 @@ plot_bivariate <- function(plot_data,
     ggplot2::scale_shape_manual(guide=FALSE, values=c(19, 4)) +
     ggplot2::xlab(parameter_1_label) + ggplot2::ylab(parameter_2_label)
 
-  if(log_1)
+  if(log_1) {
     plot <- plot + ggplot2::scale_x_log10(limits = range_1)
+  } else {
+    plot <- plot + ggplot2::scale_x_continuous(limits = range_1)
+  }
 
-  if(log_2)
+  if(log_2) {
     plot <- plot + ggplot2::scale_y_log10(limits = range_2)
+  } else {
+    plot <- plot + ggplot2::scale_y_continuous(limits = range_2)
+  }
 
   return(plot)
 
