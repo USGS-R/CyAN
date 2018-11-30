@@ -286,7 +286,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                           collect = FALSE,
                           north_latitude = NULL, south_latitude = NULL,
                           west_longitude = NULL, east_longitude = NULL,
-                          start_date = NULL, end_date = NULL) {
+                          years = NULL) {
 
   all_data <- get_cyan_data(cyan_connection, north_latitude = north_latitude,
                             south_latitude = south_latitude,
