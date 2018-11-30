@@ -134,12 +134,12 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
                           minimum_tier = NULL,
                           states  = NULL) {
 
-  # LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
-  #   STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
-  #   DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID.PARAMETER <-
-  #   LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
-  #   TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
-  #   STATECODE <- ".dplyr.var"
+  LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
+    STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
+    DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID.PARAMETER <-
+    LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
+    TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
+    STATECODE <- ".dplyr.var"
 
   location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
     dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, LOCATION_NAME, LOCALTZ)
@@ -270,8 +270,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #' should be given as a negative number of decimal degrees west of the prime
 #' meridian.
 #'
-#' @param start_date,end_date dates can be given as character strings in the
-#' form "yyyy-mm-dd" or as Date objects
+#' @param years numeric vector of years that will be included in the query
 #'
 ##' @return if collect is FALSE, the query will be generated, but not collected.
 #' See the documentation on \code{collect} for details. Otherwise, if collect
@@ -293,7 +292,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                             south_latitude = south_latitude,
                             east_longitude = east_longitude,
                             west_longitude = west_longitude,
-                            start_date = start_date, end_date = end_date,
+                            years = years,
                             parameters = c(parameter_1, parameter_2))
   parameter_1_data <- all_data %>%
     dplyr::filter(PARAMETER_ID == parameter_1)

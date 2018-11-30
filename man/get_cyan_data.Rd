@@ -6,8 +6,8 @@
 \usage{
 get_cyan_data(cyan_connection, collect = FALSE, north_latitude = NULL,
   south_latitude = NULL, west_longitude = NULL,
-  east_longitude = NULL, start_date = NULL, end_date = NULL,
-  parameters = NULL, minimum_tier = NULL, states = NULL)
+  east_longitude = NULL, years = NULL, parameters = NULL,
+  minimum_tier = NULL, states = NULL)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
@@ -25,8 +25,7 @@ and eastern most latitude that will be included in the query. Longitude
 should be given as a negative number of decimal degrees west of the prime
 meridian.}
 
-\item{start_date, end_date}{dates can be given as character strings in the
-form "yyyy-mm-dd" or as Date objects}
+\item{years}{numeric vector of years that will be included in the query}
 
 \item{parameters}{a character vector of parameter names that will be
 returned in the query}

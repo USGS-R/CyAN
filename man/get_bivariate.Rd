@@ -28,8 +28,7 @@ and eastern most latitude that will be included in the query. Longitude
 should be given as a negative number of decimal degrees west of the prime
 meridian.}
 
-\item{start_date, end_date}{dates can be given as character strings in the
-form "yyyy-mm-dd" or as Date objects}
+\item{years}{numeric vector of years that will be included in the query}
 }
 \value{
 if collect is FALSE, the query will be generated, but not collected.

@@ -23,7 +23,8 @@ obtained using the \code{find_flagged} function. These results will
 be plotted with an x symbol rather than a filled circle}
 
 \item{range_1, range_2}{numeric vectors specifiying the range for
-values in parameter 1 and parameter 2, respectively}
+values in parameter 1 and parameter 2, respectively. The minimum
+should be given first, followed by the maximum.}
 }
 \description{
 Plot data retrieved using \code{get_bivariate}
