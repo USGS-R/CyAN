@@ -13,7 +13,7 @@ run_CyAN <- function() {
     stop("Couldn't find app directory, try reinstalling the package")
   }
 
-  shiny::runApp(appDir, launch.browser = TRUE)
+  shiny::runApp(app_dir, launch.browser = TRUE)
 
 }
 
