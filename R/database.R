@@ -36,6 +36,8 @@ connect_cyan <- function(path) {
 #' @return a data frame of all unique combinations of location and parameter
 #'
 #' @importFrom magrittr %>%
+#'
+#' @export
 
 generate_location_index <- function(cyan_connection) {
 
@@ -71,6 +73,8 @@ generate_location_index <- function(cyan_connection) {
 #' short names
 #'
 #' @importFrom magrittr %>%
+#'
+#' @export
 
 generate_parameter_index <- function(cyan_connection) {
 
