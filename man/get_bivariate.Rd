@@ -6,8 +6,7 @@
 \usage{
 get_bivariate(cyan_connection, parameter_1, parameter_2, collect = FALSE,
   north_latitude = NULL, south_latitude = NULL,
-  west_longitude = NULL, east_longitude = NULL, start_date = NULL,
-  end_date = NULL)
+  west_longitude = NULL, east_longitude = NULL, years = NULL)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
