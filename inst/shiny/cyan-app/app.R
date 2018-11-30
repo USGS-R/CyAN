@@ -11,7 +11,14 @@ options(shiny.maxRequestSize=2000*1024^2)
 load("database/tzlookup.Rdata")
 load("database/locationIndex.RData")
 load("database/parameterIndex.RData")
-parameterChoices <- paste(parameterIndex[,2], " ", "[", parameterIndex[,1], "]", sep="")
+
+null_if_blank_as_num <- function(x) {
+  if(x == "") {
+    return(NULL)
+  } else {
+    return(as.numeric(x))
+  }
+}
 
 ui <- dashboardPage(
 
