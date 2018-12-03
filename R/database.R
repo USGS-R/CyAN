@@ -363,10 +363,18 @@ add_GMT_time <- function(cyan_data) {
 
   output <- cyan_data %>%
     dplyr::mutate(datetime = paste(STARTDATE, STARTTIME))
+
+  #Sometimes 3 letter time zone abbreviations cause issues
+  timezone <- output$TIMEZONE
+  timezone[timezone %in% c("EST", "EDT")] <- "America/New_York"
+  timezone[timezone %in% c("CST", "CDT")] <- "America/Chicago"
+  timezone[timezone %in% c("MST", "MDT")] <- "America/Denver"
+  timezone[timezone %in% c("PST", "PDT")] <- "America/Los_Angeles"
+
   gmt_time <- vector(length = nrow(output))
   for(i in 1:nrow(output)) {
     gmt_time[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
-                                                   tz = output$TIMEZONE[i]), tz = "GMT")
+                                                   tz = timezone[i]), tz = "GMT")
   }
   #If any timezones are blank, don't output a GMT time
   gmt_time[output$TIMEZONE == ""] <- NA
@@ -396,11 +404,24 @@ add_solar_noon <- function(cyan_data) {
 
   output <- dplyr::mutate(cyan_data, datetime = paste(STARTDATE, STARTTIME))
 
+  #Sometimes 3 letter time zone abbreviations cause issues
+  timezone <- output$TIMEZONE
+  timezone[timezone %in% c("EST", "EDT")] <- "America/New_York"
+  timezone[timezone %in% c("CST", "CDT")] <- "America/Chicago"
+  timezone[timezone %in% c("MST", "MDT")] <- "America/Denver"
+  timezone[timezone %in% c("PST", "PDT")] <- "America/Los_Angeles"
+
+  localtz <- output$LOCALTZ
+  localtz[localtz %in% c("EST", "EDT")] <- "America/New_York"
+  localtz[localtz %in% c("CST", "CDT")] <- "America/Chicago"
+  localtz[localtz %in% c("MST", "MDT")] <- "America/Denver"
+  localtz[localtz %in% c("PST", "PDT")] <- "America/Los_Angeles"
+
   hour <- vector(length = nrow(output))
   for(i in 1:nrow(cyan_data)) {
     hour[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
-                                               tz = output$TIMEZONE[i]),
-                            tz = output$LOCALTZ[i], format = "%H")
+                                               tz = timezone[i]),
+                            tz = localtz[i], format = "%H")
   }
   hour <- as.numeric(hour)
   solar_noon <- hour %in% 10:13
