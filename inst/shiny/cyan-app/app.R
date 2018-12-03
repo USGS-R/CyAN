@@ -388,12 +388,26 @@ server <- function(input, output) {
   })
 
   output$method_highlight_controls <- renderUI({
+
     if(is.null(input$biv_parm_1))
       return(NULL)
 
     if(input$biv_parm_1 != "None" & input$biv_parm_2 != "None") {
+
+      if(input$biv_color == "METHOD_ID.1") {
+        methods <- bivariate_data()[,c("METHOD_ID.1", "NOTE.1")]
+        methods <- unique(methods)
+        method_choices <- methods$METHOD_ID.1
+        names(method_choices) <- methods$NOTE.1
+      } else {
+        methods <- bivariate_data()[,c("METHOD_ID.2", "NOTE.2")]
+        methods <- unique(methods)
+        method_choices <- methods$METHOD_ID.2
+        names(method_choices) <- methods$NOTE.2
+      }
       methods <- unique(bivariate_data()[,input$biv_color])
-      selectizeInput("method_highlight", "Methods", choices=c("None", methods), multiple=TRUE, selected="None")
+      selectInput("method_highlight", "Methods", choices=c("None", method_choices),
+                     multiple=TRUE, selected="None")
     }
   })
 
