@@ -319,7 +319,7 @@ server <- function(input, output) {
     choices <- parameter_index()$PARAMETER_ID
     names(choices) <- parameterIndex$SHORT_NAME
 
-    selectInput("parms", "Parameters:",  choices = choices)
+    selectInput("parms", "Parameters:",  choices = choices, multiple = TRUE)
 
   })
 
@@ -353,19 +353,26 @@ server <- function(input, output) {
         states <- input$states[input$states != "All"]
       }
 
-      output <- get_cyan_data_spread(cyan_connection = cyan_connection(),
+      download_notification <- showNotification("Preparing data...", duration = NULL)
+
+      output <- get_cyan_data(cyan_connection = cyan_connection(),
                               collect = TRUE,
                               north_latitude = n_lat, south_latitude = s_lat,
                               east_longitude = e_long, west_longitude = w_long,
                               years = years,
                               parameters = parameters)
+
       if(input$add_GMT) {
-        output <- add_GMT(output)
+        showNotification("Adding GMT...", id = download_notification, duration = NULL)
+        output <- add_GMT_time(output)
       }
 
       if(input$add_solar_noon) {
+        showNotification("Adding solar noon...", id = download_notification, duration = NULL)
         output <- add_solar_noon(output)
       }
+
+      removeNotification(id = download_notification)
 
       write.csv(output, file)
 
@@ -411,7 +418,7 @@ server <- function(input, output) {
       north_latitude <- south_latitude <- east_longitude <- west_longitude <- NULL
     }
 
-    data_notification <- showNotification("Getting data...", type = "message")
+    data_notification <- showNotification("Getting data...", type = "message", duration = NULL)
 
     data <- get_bivariate(cyan_connection(), input$biv_parm_1, input$biv_parm_2,
                           collect = TRUE,
@@ -442,7 +449,7 @@ server <- function(input, output) {
     method_highlight <- input$method_highlight
     flagged_results = bivariate_flagged()
 
-    plot_notification <- showNotification("Plotting...")
+    plot_notification <- showNotification("Plotting...", duration = NULL)
 
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
