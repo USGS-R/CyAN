@@ -444,6 +444,11 @@ server <- function(input, output) {
     method_highlight <- input$method_highlight
     flagged_results <- bivariate_flagged()
 
+    if(nrow(bivariate_data()) == 0) {
+      plot_notification <- showNotification("No data found", type = "error", duration = 10)
+      return(NULL)
+    }
+
     plot_notification <- showNotification("Plotting...", duration = NULL)
 
     plot <- plot_bivariate(bivariate_data(),
@@ -482,6 +487,10 @@ server <- function(input, output) {
     flagged_results <- bivariate_flagged()
     range_1 <- zoom_range$x
     range_2 <- zoom_range$y
+
+    if(nrow(bivariate_data()) == 0) {
+      return(NULL)
+    }
 
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
