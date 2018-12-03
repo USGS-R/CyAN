@@ -60,8 +60,8 @@ plot_bivariate <- function(plot_data,
     plot_data$highlight <- FALSE
   } else {
     plot_data$highlight <-
-      plot_data$METHOD_ID.1 == method_highlight |
-      plot_data$METHOD_ID.2 == method_highlight
+      plot_data$METHOD_ID.1 %in% method_highlight |
+      plot_data$METHOD_ID.2 %in% method_highlight
   }
 
   if(is.null(flagged_results)) {
@@ -85,7 +85,7 @@ plot_bivariate <- function(plot_data,
                    panel.grid.major = ggplot2::element_line(colour='grey60'),
                    panel.grid.minor = ggplot2::element_line(colour='grey60', linetype = "dashed")) +
     ggplot2::geom_point(size=1.5) +
-    ggplot2::scale_color_manual(guide=FALSE, values=c("black", "red1")) +
+    ggplot2::scale_color_manual(guide=FALSE, breaks = c(FALSE, TRUE),values=c("black", "red1")) +
     ggplot2::scale_shape_manual(guide=FALSE, values=c(19, 4)) +
     ggplot2::xlab(parameter_1_label) + ggplot2::ylab(parameter_2_label)
 
