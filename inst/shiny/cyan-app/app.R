@@ -397,6 +397,11 @@ server <- function(input, output) {
 
   bivariate_data <- reactive({
 
+    if(is.null(input$biv_parm_1) || is.null(input$biv_parm_2))
+      return(NULL)
+    if("None" %in% c(input$biv_parm_1, input$biv_parm_2))
+      return(NULL)
+
     if(input$biv_map_limit) {
       north_latitude <- null_if_blank_as_num(input$n_lat)
       south_latitude <- null_if_blank_as_num(input$s_lat)
@@ -406,11 +411,16 @@ server <- function(input, output) {
       north_latitude <- south_latitude <- east_longitude <- west_longitude <- NULL
     }
 
+    data_notification <- showNotification("Getting data...", type = "message")
+
     data <- get_bivariate(cyan_connection(), input$biv_parm_1, input$biv_parm_2,
                           collect = TRUE,
                           north_latitude = north_latitude, south_latitude = south_latitude,
                           west_longitude = west_longitude, east_longitude = east_longitude,
                           years = input$biv_years)
+
+    removeNotification(id = data_notification)
+
     data
 
   })
@@ -424,15 +434,23 @@ server <- function(input, output) {
 
   output$bivariate_plot <- renderPlot({
 
+    if(is.null(bivariate_data()))
+      return(NULL)
+
     log_1 <- "x" %in% input$log_biv
     log_2 <- "y" %in% input$log_biv
     method_highlight <- input$method_highlight
     flagged_results = bivariate_flagged()
 
+    plot_notification <- showNotification("Plotting...")
+
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
                            method_highlight = method_highlight,
                            flagged_results = flagged_results)
+
+    removeNotification(id = plot_notification)
+
     plot
 
   })
@@ -452,6 +470,9 @@ server <- function(input, output) {
   })
 
   output$zoomed_bivariate_plot <- renderPlot({
+
+    if(is.null(bivariate_data()))
+      return(NULL)
 
     log_1 <- "x" %in% input$log_biv
     log_2 <- "y" %in% input$log_biv
