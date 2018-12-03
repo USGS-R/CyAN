@@ -140,10 +140,10 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
   LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
     STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
-    DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID.PARAMETER <-
+    DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID <-
     LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
     TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
-    STATECODE <- ".dplyr.var"
+    STATECODE <- LOCATION_NAME <- STRFTIME <- YEAR <- ".dplyr.var"
 
   location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
     dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, LOCATION_NAME, LOCALTZ)
@@ -292,6 +292,8 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                           west_longitude = NULL, east_longitude = NULL,
                           years = NULL) {
 
+  PARAMETER_ID <- ".dplyr.var"
+
   all_data <- get_cyan_data(cyan_connection, north_latitude = north_latitude,
                             south_latitude = south_latitude,
                             east_longitude = east_longitude,
@@ -331,7 +333,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 
 find_flagged <- function(cyan_connection, flag_code) {
 
-  FLAG_CODE <- ".dplyr.var"
+  FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
   flags <- dplyr::tbl(cyan_connection, "QCFLAGS") %>%
     dplyr::filter(FLAG_CODE == flag_code) %>%
@@ -356,6 +358,8 @@ find_flagged <- function(cyan_connection, flag_code) {
 #'
 
 add_GMT_time <- function(cyan_data) {
+
+  STARTDATE <- STARTTIME <- datetime <- ".dplyr.var"
 
   output <- cyan_data %>%
     dplyr::mutate(datetime = paste(STARTDATE, STARTTIME))
@@ -387,6 +391,8 @@ add_GMT_time <- function(cyan_data) {
 #' @export
 
 add_solar_noon <- function(cyan_data) {
+
+  STARTDATE <- STARTTIME <- datetime <- ".dplyr.var"
 
   output <- dplyr::mutate(cyan_data, datetime = paste(STARTDATE, STARTTIME))
 

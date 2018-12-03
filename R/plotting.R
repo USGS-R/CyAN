@@ -28,6 +28,8 @@ plot_bivariate <- function(plot_data,
                            method_highlight = NULL, flagged_results = NULL,
                            range_1 = NULL, range_2 = NULL) {
 
+  VALUE.1 <- VALUE.2 <- highlight <- is_flagged <- ".dplyr.var"
+
   if(!all(is.logical(c(log_1, log_2))))
     stop("log_1 and log_2 should be TRUE/FALSE")
 
@@ -51,7 +53,7 @@ plot_bivariate <- function(plot_data,
 
   if(nrow(plot_data > 10000)) {
     warning("plot_data contains more than 10,000 rows and will be truncated")
-    plot_data <- head(plot_data, 10000)
+    plot_data <- utils::head(plot_data, 10000)
   }
 
   if(is.null(method_highlight)) {
