@@ -8,9 +8,7 @@ library(fs)
 
 options(shiny.maxRequestSize=2000*1024^2)
 
-load("database/tzlookup.Rdata")
-load("database/locationIndex.RData")
-load("database/parameterIndex.RData")
+load(system.file("shiny", "cyan-app", "database", "locationIndex.RData", package = "CyAN"))
 
 null_if_blank_as_num <- function(x) {
   if(x == "") {
