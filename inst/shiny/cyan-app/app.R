@@ -312,7 +312,7 @@ server <- function(input, output) {
       return(NULL)
 
     choices <- parameter_index()$PARAMETER_ID
-    names(choices) <- parameterIndex$SHORT_NAME
+    names(choices) <- parameter_index()$SHORT_NAME
 
     selectInput("parms", "Parameters:",  choices = choices, multiple = TRUE)
 
@@ -380,7 +380,7 @@ server <- function(input, output) {
       return(NULL)
 
     choices <- parameter_index()$PARAMETER_ID
-    names(choices) <- parameterIndex$SHORT_NAME
+    names(choices) <- parameter_index()$SHORT_NAME
     tagList(
       selectInput("biv_parm_1", "Parameter 1 (x-axis):", choices = c("None" = "None", choices)),
       selectInput("biv_parm_2", "Parameter 2 (y-axis):", choices = c("None" = "None", choices))
