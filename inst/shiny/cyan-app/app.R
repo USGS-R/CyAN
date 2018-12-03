@@ -206,7 +206,7 @@ server <- function(input, output) {
       zoom <- as.numeric(zoomWindow())
       points <- location_index()
     })
-    print(zoom)
+
     points <- location_index()
 
     if(!is.null(selected_parameters)) {
@@ -225,14 +225,11 @@ server <- function(input, output) {
         distinct
     }
 
-    print(head(mapData))
-
     if(!all(is.na(zoom))) {
       mapData <- filter(mapData,
                         LATITUDE >= zoom[3], LATITUDE <= zoom[1],
                         LONGITUDE <= zoom[2], LONGITUDE >= zoom[4])
     }
-    print(head(mapData))
 
     mapData
 
@@ -487,9 +484,6 @@ server <- function(input, output) {
     flagged_results = bivariate_flagged()
     range_1 <- zoom_range$x
     range_2 <- zoom_range$y
-
-    print(range_1)
-    print(range_2)
 
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
