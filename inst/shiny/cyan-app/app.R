@@ -444,12 +444,6 @@ server <- function(input, output) {
     method_highlight <- input$method_highlight
     flagged_results <- bivariate_flagged()
 
-    print(log_1)
-    print(log_2)
-    print(method_highlight)
-    print(head(flagged_results))
-    print(head(bivariate_data()))
-
     plot_notification <- showNotification("Plotting...", duration = NULL)
 
     plot <- plot_bivariate(bivariate_data(),
