@@ -442,7 +442,13 @@ server <- function(input, output) {
     log_1 <- "x" %in% input$log_biv
     log_2 <- "y" %in% input$log_biv
     method_highlight <- input$method_highlight
-    flagged_results = bivariate_flagged()
+    flagged_results <- bivariate_flagged()
+
+    print(log_1)
+    print(log_2)
+    print(method_highlight)
+    print(head(flagged_results))
+    print(head(bivariate_data()))
 
     plot_notification <- showNotification("Plotting...", duration = NULL)
 
@@ -479,7 +485,7 @@ server <- function(input, output) {
     log_1 <- "x" %in% input$log_biv
     log_2 <- "y" %in% input$log_biv
     method_highlight <- input$method_highlight
-    flagged_results = bivariate_flagged()
+    flagged_results <- bivariate_flagged()
     range_1 <- zoom_range$x
     range_2 <- zoom_range$y
 
