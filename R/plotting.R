@@ -44,6 +44,7 @@ plot_bivariate <- function(plot_data,
     if(length(range_1) != 2)
       stop("range_1 should be length 2")
   }
+
   if(!is.null(range_2)) {
     if(!is.numeric(range_2))
       stop("range_2 should be numeric")
@@ -85,9 +86,14 @@ plot_bivariate <- function(plot_data,
                    panel.grid.major = ggplot2::element_line(colour='grey60'),
                    panel.grid.minor = ggplot2::element_line(colour='grey60', linetype = "dashed")) +
     ggplot2::geom_point(size=1.5) +
-    ggplot2::scale_color_manual(guide=FALSE, breaks = c(FALSE, TRUE),values=c("black", "red1")) +
+    ggplot2::scale_color_manual(guide=FALSE, breaks = c(FALSE, TRUE), values=c("black", "red1")) +
     ggplot2::scale_shape_manual(guide=FALSE, values=c(19, 4)) +
     ggplot2::xlab(parameter_1_label) + ggplot2::ylab(parameter_2_label)
+
+  if(is.null(range_1))
+    range_1 <- c(min(plot_data$VALUE.1, na.rm = TRUE), max(plot_data$VALUE.1, na.rm = TRUE))
+  if(is.null(range_2))
+    range_2 <- c(min(plot_data$VALUE.2, na.rm = TRUE), max(plot_data$VALUE.2, na.rm = TRUE))
 
   if(log_1) {
     plot <- plot + ggplot2::scale_x_log10(limits = range_1)
