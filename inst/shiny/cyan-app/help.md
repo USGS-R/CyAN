@@ -7,7 +7,7 @@ The rest of this page explains how to use the app. Each heading represents a men
 To run the app, you can install the CyAN package, load the package using `library()` and then use the `run_CyAN()` function. In an R session you can run the following code:
 
 ```r
-devtools::install_github("PatrickEslick/CyAN")
+devtools::install_github("USGS-R/CyAN")
 library(CyAN)
 run_CyAN()
 ```
