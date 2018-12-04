@@ -70,7 +70,7 @@ ui <- dashboardPage(
                         draggable=TRUE, top=60, left=20, right="auto", bottom="auto",
                         width=400, height="auto",
                         textInput("download_filename", "Output file name (no extension"),
-                        checkboxInput("fill_bounds", "Fill bounds from map", value = FALSE),
+                        checkboxInput("fill_bounds", "Fill bounds from map", value = TRUE),
                         fluidRow(
                           column(4),
                           column(4, uiOutput("n_lat_box")),
