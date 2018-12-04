@@ -433,7 +433,7 @@ server <- function(input, output) {
                           collect = TRUE,
                           north_latitude = north_latitude, south_latitude = south_latitude,
                           west_longitude = west_longitude, east_longitude = east_longitude,
-                          years = input$biv_years)
+                          years = input$biv_years[1]:input$biv_years[2])
 
     removeNotification(id = data_notification)
 
@@ -461,6 +461,11 @@ server <- function(input, output) {
     if(nrow(bivariate_data()) == 0) {
       plot_notification <- showNotification("No data found", type = "error", duration = 10)
       return(NULL)
+    }
+
+    if(nrow(bivariate_data()) > 10000) {
+      showNotification("Plotting first 10000 points, try narrowing down your search",
+                                             type = "warning", duration = 10)
     }
 
     plot_notification <- showNotification("Plotting...", duration = NULL)
