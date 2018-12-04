@@ -6,8 +6,7 @@
 \usage{
 get_bivariate(cyan_connection, parameter_1, parameter_2, collect = FALSE,
   north_latitude = NULL, south_latitude = NULL,
-  west_longitude = NULL, east_longitude = NULL, start_date = NULL,
-  end_date = NULL)
+  west_longitude = NULL, east_longitude = NULL, years = NULL)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
@@ -28,8 +27,14 @@ and eastern most latitude that will be included in the query. Longitude
 should be given as a negative number of decimal degrees west of the prime
 meridian.}
 
-\item{start_date, end_date}{dates can be given as character strings in the
-form "yyyy-mm-dd" or as Date objects}
+\item{years}{numeric vector of years that will be included in the query}
+}
+\value{
+if collect is FALSE, the query will be generated, but not collected.
+See the documentation on \code{collect} for details. Otherwise, if collect
+is TRUE, the query will be pulled into memory and returned as a tibble.
+Returns a wide data frame, with a shared activity, depth, and depth_unit
+columns, and all other columns suffixed with .1 or .2 for the two parameters.
 }
 \description{
 Find sampling activities that have associated measurements of two parameters
