@@ -24,6 +24,7 @@ ui <- dashboardPage(
 
   dashboardSidebar(
     sidebarMenu(id = "sidebar",
+      menuItem("Information", tabName = "help"),
       menuItem("Configure", tabName = "db_configuration"),
       menuItem("Map", tabName = "map_screen"),
       menuItem("Bivariate Plot", tabName = "bivariate_plot"),
@@ -43,6 +44,9 @@ ui <- dashboardPage(
 
   dashboardBody(
     tabItems(
+      tabItem(tabName = "help",
+        includeMarkdown("help.md")
+      ),
       tabItem(tabName = "db_configuration",
         h3("Connect to database"),
         shinyFilesButton('db_file', label = "Database file", title = "CyAN Database", multiple = FALSE)
