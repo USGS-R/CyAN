@@ -15,6 +15,6 @@ find_flagged(cyan_connection, flag_code)
 a vector of result_ids with the given flag
 }
 \description{
-Check the QCFLAGS table to find results that have been flagged with
+Check the QC_FLAGS table to find results that have been flagged with
 the given flag code
 }

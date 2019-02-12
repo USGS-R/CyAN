@@ -28,7 +28,7 @@ plot_bivariate <- function(plot_data,
                            method_highlight = NULL, flagged_results = NULL,
                            range_1 = NULL, range_2 = NULL) {
 
-  VALUE.1 <- VALUE.2 <- highlight <- is_flagged <- ".dplyr.var"
+  RESULT_VALUE.1 <- RESULT_VALUE.2 <- highlight <- is_flagged <- ".dplyr.var"
 
   if(!all(is.logical(c(log_1, log_2))))
     stop("log_1 and log_2 should be TRUE/FALSE")
@@ -76,11 +76,27 @@ plot_bivariate <- function(plot_data,
   parameter_1_label <- plot_data$PARAMETER_NAME.1[1]
   parameter_2_label <- plot_data$PARAMETER_NAME.2[1]
 
-  plot_data$VALUE.1 <- as.numeric(plot_data$VALUE.1)
-  plot_data$VALUE.2 <- as.numeric(plot_data$VALUE.2)
+  plot_data$RESULT_VALUE.1 <- as.numeric(plot_data$RESULT_VALUE.1)
+  plot_data$RESULT_VALUE.2 <- as.numeric(plot_data$RESULT_VALUE.2)
+
+  if(log_1) {
+    if(any(plot_data$RESULT_VALUE.1 <= 0)) {
+      message("Removing values of parameter 1 that are 0 or less")
+      plot_data <- plot_data %>%
+        dplyr::filter(RESULT_VALUE.1 > 0)
+    }
+  }
+
+  if(log_2) {
+    if(any(plot_data$RESULT_VALUE.2 <= 0)) {
+      message("Removing values of parameter 2 that are 0 or less")
+      plot_data <- plot_data %>%
+        dplyr::filter(RESULT_VALUE.2 > 0)
+    }
+  }
 
   plot <- ggplot2::ggplot(plot_data,
-                 ggplot2::aes(x = VALUE.1, y = VALUE.2,
+                 ggplot2::aes(x = RESULT_VALUE.1, y = RESULT_VALUE.2,
                               color = highlight, shape = is_flagged)) +
     ggplot2::theme(panel.background = ggplot2::element_blank(),
                    panel.grid.major = ggplot2::element_line(colour='grey60'),
@@ -91,9 +107,9 @@ plot_bivariate <- function(plot_data,
     ggplot2::xlab(parameter_1_label) + ggplot2::ylab(parameter_2_label)
 
   if(is.null(range_1))
-    range_1 <- c(min(plot_data$VALUE.1, na.rm = TRUE), max(plot_data$VALUE.1, na.rm = TRUE))
+    range_1 <- c(min(plot_data$RESULT_VALUE.1, na.rm = TRUE), max(plot_data$RESULT_VALUE.1, na.rm = TRUE))
   if(is.null(range_2))
-    range_2 <- c(min(plot_data$VALUE.2, na.rm = TRUE), max(plot_data$VALUE.2, na.rm = TRUE))
+    range_2 <- c(min(plot_data$RESULT_VALUE.2, na.rm = TRUE), max(plot_data$RESULT_VALUE.2, na.rm = TRUE))
 
   if(log_1) {
     plot <- plot + ggplot2::scale_x_log10(limits = range_1)

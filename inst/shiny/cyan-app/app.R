@@ -399,15 +399,19 @@ server <- function(input, output) {
     if(input$biv_parm_1 != "None" & input$biv_parm_2 != "None") {
 
       if(input$biv_color == "METHOD_ID.1") {
-        methods <- bivariate_data()[,c("METHOD_ID.1", "NOTE.1")]
+        methods <- bivariate_data()[,c("METHOD_ID.1", "WQP_METHOD_IDENTIFIER.1",
+                                       "WQP_METHOD_CONTEXT.1", "WQP_METHOD_NAME.1")]
         methods <- unique(methods)
         method_choices <- methods$METHOD_ID.1
-        names(method_choices) <- methods$NOTE.1
+        names(method_choices) <- paste(methods$WQP_METHOD_CONTEXT.1, methods$WQP_METHOD_IDENTIFIER.1,
+                                       methods$WQP_METHOD_NAME.1, sep = "/")
       } else {
-        methods <- bivariate_data()[,c("METHOD_ID.2", "NOTE.2")]
+        methods <- bivariate_data()[,c("METHOD_ID.2", "WQP_METHOD_IDENTIFIER.2",
+                                       "WQP_METHOD_CONTEXT.2", "WQP_METHOD_NAME.2")]
         methods <- unique(methods)
         method_choices <- methods$METHOD_ID.2
-        names(method_choices) <- methods$NOTE.2
+        names(method_choices) <- paste(methods$WQP_METHOD_CONTEXT.2, methods$WQP_METHOD_IDENTIFIER.2,
+                                       methods$WQP_METHOD_NAME.2, sep = "/")
       }
       methods <- unique(bivariate_data()[,input$biv_color])
       selectInput("method_highlight", "Methods", choices=c("None", method_choices),
