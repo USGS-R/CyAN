@@ -138,26 +138,51 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
                           minimum_tier = NULL,
                           states  = NULL) {
 
-  LOCATION_ID <- LATITUDE.LOCATION <- LONGITUDE.LOCATION <- STARTDATE <-
-    STARTTIME <- ENDDATE <- ENDTIME <- TIMEZONE <- SAMPLE_TYPE <-
-    DEPTH <- DEPTH_UNIT <- VALUE <- FLAG <- PARAMETER_ID <-
-    LOCALTZ <- PARAMETER_NAME <- UNITS <- ACTIVITY_ID <- RESULT_ID <-
-    TIER <- METHOD_ID <- NOTE <- LATITUDE <- LONGITUDE <- PARAMETER_ID <-
-    STATECODE <- LOCATION_NAME <- STRFTIME <- YEAR <- ".dplyr.var"
+  LOCATION_ID <- LOCATION_NAME <- LATITUDE <- LONGITUDE <- DATUM <- STATE_CODE <-
+    HUC <- START_DATE <- START_TIME <- END_DATE <- END_TIME <- TZ <-
+    COLLECTION_METHOD_ID <- SAMPLE_TYPE_CODE <- ACTIVITY_DEPTH <-
+    ACTIVITY_DEPTH_UNIT <- ACTIVITY_TOP_DEPTH <- ACTIVITY_TOP_DEPTH_UNIT <-
+    ACTIVITY_BOTTOM_DEPTH <- ACTIVITY_BOTTOM_DEPTH_UNIT <-
+    ACTIVITY_DEPTH_REFERENCE <- ACTIVITY_COMMENT <- RESULT_ID <- ACTIVITY_ID <-
+    PARAMETER_ID <- METHOD_ID <- RESULT_DEPTH <- RESULT_DEPTH_UNIT <-
+    RESULT_DEPTH_REFERENCE <- QUALIFIER <- RESULT_VALUE <- DETECTION_LIMIT_VALUE <-
+    DETECTION_LIMIT_UNIT <- DETECTION_LIMIT_TYPE <- TIER <- CROSSWALK_ID <-
+    PARAMETER_NAME <- UNITS <- WQP_METHOD_IDENTIFIER <- WQP_METHOD_CONTEXT <-
+    WQP_METHOD_NAME <- WQP_METHOD_DESCRIPTION <- WQP_COLLECTION_METHOD_ID <-
+    WQP_COLLECTION_METHOD_CONTEXT <- WQP_COLLECTION_METHOD_NAME <- LOCATION_TYPE <-
+    LOCAL_TZ <- STRFTIME <- SAMPLE_TYPE_DEFINITION <- YEAR <- ".dplyr.var"
 
   location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
-    dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, LOCATION_NAME, LOCALTZ)
+    dplyr::select(LOCATION_ID, LOCATION_TYPE, LATITUDE, LONGITUDE, DATUM, STATE_CODE, HUC,
+                  LOCATION_NAME, LOCAL_TZ)
+
   activity <- dplyr::tbl(cyan_connection, "ACTIVITY") %>%
-    dplyr::select(ACTIVITY_ID, LOCATION_ID, STARTDATE, STARTTIME, ENDDATE, ENDTIME,
-           TIMEZONE, SAMPLE_TYPE) %>%
-    dplyr::mutate(YEAR = as.numeric(STRFTIME('%Y', STARTDATE)))
+    dplyr::select(ACTIVITY_ID, START_DATE, START_TIME, END_DATE, END_TIME, TZ,
+                  LOCATION_ID, COLLECTION_METHOD_ID, SAMPLE_TYPE_CODE, ACTIVITY_DEPTH,
+                  ACTIVITY_DEPTH_UNIT, ACTIVITY_TOP_DEPTH, ACTIVITY_TOP_DEPTH_UNIT,
+                  ACTIVITY_BOTTOM_DEPTH, ACTIVITY_BOTTOM_DEPTH_UNIT,
+                  ACTIVITY_DEPTH_REFERENCE, ACTIVITY_COMMENT) %>%
+    dplyr::mutate(YEAR = as.numeric(STRFTIME('%Y', START_DATE)))
+
   result <- dplyr::tbl(cyan_connection, "RESULT") %>%
-    dplyr::select(RESULT_ID, ACTIVITY_ID, VALUE, FLAG, PARAMETER_ID, METHOD_ID, DEPTH,
-           DEPTH_UNIT, TIER)
+    dplyr::select(RESULT_ID, ACTIVITY_ID, PARAMETER_ID, METHOD_ID, RESULT_DEPTH,
+                  RESULT_DEPTH_UNIT, RESULT_DEPTH_REFERENCE, QUALIFIER,
+                  RESULT_VALUE, DETECTION_LIMIT_VALUE, DETECTION_LIMIT_UNIT,
+                  DETECTION_LIMIT_TYPE, CROSSWALK_ID)
+
   parameter <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
     dplyr::select(PARAMETER_ID, PARAMETER_NAME, UNITS)
+
   method <- dplyr::tbl(cyan_connection, "METHOD") %>%
-    dplyr::select(METHOD_ID, NOTE)
+    dplyr::select(METHOD_ID, WQP_METHOD_IDENTIFIER, WQP_METHOD_CONTEXT, WQP_METHOD_NAME,
+                  WQP_METHOD_DESCRIPTION)
+
+  sample_type <- dplyr::tbl(cyan_connection, "SAMPLE_TYPE") %>%
+    dplyr::select(SAMPLE_TYPE_CODE, SAMPLE_TYPE_DEFINITION)
+
+  collection_method <- dplyr::tbl(cyan_connection, "COLLECTION_METHOD") %>%
+    dplyr::select(COLLECTION_METHOD_ID, WQP_COLLECTION_METHOD_ID,
+                  WQP_COLLECTION_METHOD_CONTEXT, WQP_COLLECTION_METHOD_NAME)
 
   if(!(is.null(north_latitude))) {
 
@@ -223,7 +248,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     result <- dplyr::filter(result, TIER >= minimum_tier)
   }
   if(!(is.null(states))) {
-    location <- dplyr::filter(location, STATECODE %in% states)
+    location <- dplyr::filter(location, STATE_CODE %in% states)
   }
 
   if(collect) {
@@ -233,6 +258,8 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     result <- dplyr::collect(result)
     parameter <- dplyr::collect(parameter)
     method <- dplyr::collect(method)
+    sample_type <- dplyr::collect(sample_type)
+    collection_method <- dplyr::collect(collection_method)
   }
 
   output <- location %>%
@@ -240,10 +267,10 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     dplyr::inner_join(result, by = "ACTIVITY_ID", suffix = c(".ACTIVITY", ".RESULT")) %>%
     dplyr::inner_join(parameter, by = "PARAMETER_ID", suffix = c(".RESULT", ".PARAMETER")) %>%
     dplyr::inner_join(method, by = "METHOD_ID", suffix = c(".PARAMETER", ".METHOD")) %>%
-    dplyr::select(LOCATION_ID, LATITUDE, LONGITUDE, STARTDATE, STARTTIME,
-                  ENDDATE, ENDTIME, TIMEZONE, SAMPLE_TYPE, DEPTH, DEPTH_UNIT,
-                  VALUE, FLAG, PARAMETER_ID, LOCALTZ, PARAMETER_NAME, UNITS,
-                  ACTIVITY_ID, RESULT_ID, TIER, METHOD_ID, NOTE)
+    dplyr::inner_join(sample_type, by = "SAMPLE_TYPE_CODE",
+                      suffix = c(".METHOD", ".SAMPLE_TYPE")) %>%
+    dplyr::inner_join(collection_method, by = "COLLECTION_METHOD_ID",
+                      suffix = c(".SAMPLE_TYPE", "COLLECTION_METHOD"))
 
   return(output)
 
@@ -306,7 +333,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
     dplyr::filter(PARAMETER_ID == parameter_2)
 
   plot_data <- dplyr::inner_join(parameter_1_data, parameter_2_data,
-                          by = c("ACTIVITY_ID", "DEPTH", "DEPTH_UNIT"),
+                          by = "ACTIVITY_ID",
                           suffix = c(".1", ".2"))
 
   if(collect)
@@ -318,7 +345,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 
 #' Find results with a particular flag
 #'
-#' Check the QCFLAGS table to find results that have been flagged with
+#' Check the QC_FLAGS table to find results that have been flagged with
 #' the given flag code
 #'
 #' @param cyan_connection a CyAN database connection from \code{connect_cyan}
@@ -335,7 +362,7 @@ find_flagged <- function(cyan_connection, flag_code) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
-  flags <- dplyr::tbl(cyan_connection, "QCFLAGS") %>%
+  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS") %>%
     dplyr::filter(FLAG_CODE == flag_code) %>%
     dplyr::pull(RESULT_ID)
 
@@ -359,15 +386,17 @@ find_flagged <- function(cyan_connection, flag_code) {
 
 add_GMT_time <- function(cyan_data) {
 
-  STARTDATE <- STARTTIME <- datetime <- ".dplyr.var"
+  START_DATE <- START_TIME <- datetime <- ".dplyr.var"
 
   output <- cyan_data %>%
-    dplyr::mutate(datetime = paste(STARTDATE, STARTTIME))
+    dplyr::mutate(datetime = paste(START_DATE, START_TIME))
 
   #Sometimes 3 letter time zone abbreviations cause issues
-  timezone <- output$TIMEZONE
+  timezone <- output$TZ
+  state <- output$STATE_CODE
   timezone[timezone %in% c("EST", "EDT")] <- "America/New_York"
   timezone[timezone %in% c("CST", "CDT")] <- "America/Chicago"
+  timezone[timezone == "MST" & state == "AZ"] <- "America/Phoenix"
   timezone[timezone %in% c("MST", "MDT")] <- "America/Denver"
   timezone[timezone %in% c("PST", "PDT")] <- "America/Los_Angeles"
 
@@ -377,7 +406,7 @@ add_GMT_time <- function(cyan_data) {
                                                    tz = timezone[i]), tz = "GMT")
   }
   #If any timezones are blank, don't output a GMT time
-  gmt_time[output$TIMEZONE == ""] <- NA
+  gmt_time[output$TZ == ""] <- NA
   output$TIME_GMT <- gmt_time
   output <- dplyr::select(output, -datetime)
   return(output)
@@ -400,34 +429,32 @@ add_GMT_time <- function(cyan_data) {
 
 add_solar_noon <- function(cyan_data) {
 
-  STARTDATE <- STARTTIME <- datetime <- ".dplyr.var"
+  START_DATE <- START_TIME <- datetime <- ".dplyr.var"
 
-  output <- dplyr::mutate(cyan_data, datetime = paste(STARTDATE, STARTTIME))
+  output <- dplyr::mutate(cyan_data, datetime = paste(START_DATE, START_TIME))
 
   #Sometimes 3 letter time zone abbreviations cause issues
-  timezone <- output$TIMEZONE
+  timezone <- output$TZ
+  state <- output$STATE_CODE
   timezone[timezone %in% c("EST", "EDT")] <- "America/New_York"
   timezone[timezone %in% c("CST", "CDT")] <- "America/Chicago"
+  timezone[timezone == "MST" & state == "AZ"] <- "America/Phoenix"
   timezone[timezone %in% c("MST", "MDT")] <- "America/Denver"
   timezone[timezone %in% c("PST", "PDT")] <- "America/Los_Angeles"
 
-  localtz <- output$LOCALTZ
-  localtz[localtz %in% c("EST", "EDT")] <- "America/New_York"
-  localtz[localtz %in% c("CST", "CDT")] <- "America/Chicago"
-  localtz[localtz %in% c("MST", "MDT")] <- "America/Denver"
-  localtz[localtz %in% c("PST", "PDT")] <- "America/Los_Angeles"
+  local_tz <- output$LOCAL_TZ
 
   hour <- vector(length = nrow(output))
   for(i in 1:nrow(cyan_data)) {
     hour[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
                                                tz = timezone[i]),
-                            tz = localtz[i], format = "%H")
+                            tz = local_tz[i], format = "%H")
   }
   hour <- as.numeric(hour)
   solar_noon <- hour %in% 10:13
   ext_solar_noon <- hour %in% 9:14
-  solar_noon[output$TIMEZONE == "" | output$LOCALTZ == ""] <- NA
-  ext_solar_noon[output$TIMEZONE == "" | output$LOCALTZ == ""] <- NA
+  solar_noon[output$TZ == "" | output$LOCAL_TZ == ""] <- NA
+  ext_solar_noon[output$TZ == "" | output$LOCAL_TZ == ""] <- NA
 
   output$solar_noon <- solar_noon
   output$ext_solar_noon <- ext_solar_noon
