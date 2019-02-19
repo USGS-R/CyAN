@@ -11,9 +11,12 @@ Imports:
   RSQLite,
   magrittr,
   dplyr,
+  dbplyr,
   ggplot2,
   lubridate,
-  shiny
+  shiny,
+  shinyDashboard,
+  shinyFiles
 License: CC0
 Encoding: UTF-8
 LazyData: true
