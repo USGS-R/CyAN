@@ -463,3 +463,59 @@ add_solar_noon <- function(cyan_data) {
   return(output)
 
 }
+
+#' Add columns for trophic status
+#'
+#' Add three columns for trophic status, where it is possible. Trophic
+#' status can be calculated from secchi depth, chlorophyll-a, or
+#' total phosphorus
+#'
+#' @param cyan_data a data frame from \code{get_cyan_data} with
+#' \code{collect = TRUE}
+#'
+#' @return cyan_data with three additional columns. TROPHIC_STATUS_INDEX
+#'  giving the numerical trophic status index,
+#'  TROPHIC_STATUS - indicating which
+#' trophic category that index falls into, and the method used to
+#' calculate the trophic stats. TROPHIC_STATUS_METHOD
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+
+add_trophic_status <- function(cyan_data) {
+
+  #Add columns
+  cyan_data$TROPHIC_STATUS_INDEX <- NA
+  cyan_data$TROPHIC_STATUS_METHOD <- NA
+  cyan_data$TROPHIC_STATUS <- NA
+
+  #Calculate trophic status based on secchi depth
+  cyan_data$TROPHIC_STATUS_INDEX[cyan_data$PARAMETER_ID == "P0002"] <-
+    16 - (14.41 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0002"]))
+  cyan_data$TROPHIC_STATUS_METHOD[cyan_data$PARAMETER_ID == "P0002"] <- "SD"
+
+  #Calculate trophic status based on chlorophyll-a
+  cyan_data$TROPHIC_STATUS_INDEX[cyan_data$PARAMETER_ID == "P0051"] <-
+    30.6 + (9.81 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0051"]))
+  cyan_data$TROPHIC_STATUS_METHOD[cyan_data$PARAMETER_ID == "P0051"] <- "CHL-A"
+
+  #Calculate trophic status based on total phosphorus
+  cyan_data$TROPHIC_STATUS_INDEX[cyan_data$PARAMETER_ID == "P0031"] <-
+    4.15 + (14.42 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0031"] * 1000))
+  cyan_data$TROPHIC_STATUS_METHOD[cyan_data$PARAMETER_ID == "P0031"] <- "TP"
+
+  #Assign trophic status based on the index
+  cyan_data$TROPHIC_STATUS[cyan_data$TROPHIC_STATUS_INDEX >= 0 &
+                             cyan_data$TROPHIC_STATUS_INDEX < 20] <- "Ultra-oligotrophy"
+  cyan_data$TROPHIC_STATUS[cyan_data$TROPHIC_STATUS_INDEX >= 20 &
+                             cyan_data$TROPHIC_STATUS_INDEX < 40] <- "Oligotrophy"
+  cyan_data$TROPHIC_STATUS[cyan_data$TROPHIC_STATUS_INDEX >= 40 &
+                             cyan_data$TROPHIC_STATUS_INDEX < 50] <- "Mesotrophy"
+  cyan_data$TROPHIC_STATUS[cyan_data$TROPHIC_STATUS_INDEX >= 50 &
+                             cyan_data$TROPHIC_STATUS_INDEX < 70] <- "Eutrophy"
+  cyan_data$TROPHIC_STATUS[cyan_data$TROPHIC_STATUS_INDEX >= 70] <- "Hypereutrophy"
+
+  return(cyan_data)
+
+}
