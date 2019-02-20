@@ -15,7 +15,7 @@ Imports:
   ggplot2,
   lubridate,
   shiny,
-  shinyDashboard,
+  shinydashboard,
   shinyFiles
 License: CC0
 Encoding: UTF-8
