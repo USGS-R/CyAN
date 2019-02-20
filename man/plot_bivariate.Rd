@@ -6,7 +6,7 @@
 \usage{
 plot_bivariate(plot_data, log_1 = FALSE, log_2 = FALSE,
   method_highlight = NULL, flagged_results = NULL, range_1 = NULL,
-  range_2 = NULL)
+  range_2 = NULL, alpha = 1)
 }
 \arguments{
 \item{plot_data}{bivariate data to plot - should be collected
@@ -25,6 +25,9 @@ be plotted with an x symbol rather than a filled circle}
 \item{range_1, range_2}{numeric vectors specifiying the range for
 values in parameter 1 and parameter 2, respectively. The minimum
 should be given first, followed by the maximum.}
+
+\item{alpha}{number between 0 and 1 representing the opacity of the points
+0 is fully transparent, and 1 is fully opaque}
 }
 \description{
 Plot data retrieved using \code{get_bivariate}

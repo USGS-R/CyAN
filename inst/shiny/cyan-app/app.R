@@ -112,6 +112,12 @@ ui <- dashboardPage(
                           column(6, checkboxInput("add_solar_noon", "Add solar noon flag",
                                                   value = FALSE))
                         ),
+                        fluidRow(
+                          column(3),
+                          column(6, checkboxInput("add_trophic_status", "Add trophic status",
+                                 value = FALSE)),
+                          column(3)
+                        ),
                         downloadButton("download_data")
 
           )
@@ -371,6 +377,11 @@ server <- function(input, output) {
         output <- add_solar_noon(output)
       }
 
+      if(input$add_trophic_status) {
+        showNotification("Adding trophic status...", id = download_notification, duration = NULL)
+        output <- add_trophic_status(output)
+      }
+
       removeNotification(id = download_notification)
 
       write.csv(output, file)
@@ -481,7 +492,8 @@ server <- function(input, output) {
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
                            method_highlight = method_highlight,
-                           flagged_results = flagged_results)
+                           flagged_results = flagged_results,
+                           alpha = 0.6)
 
     removeNotification(id = plot_notification)
 
@@ -523,7 +535,8 @@ server <- function(input, output) {
                            log_1 = log_1, log_2 = log_2,
                            method_highlight = method_highlight,
                            flagged_results = flagged_results,
-                           range_1 = range_1, range_2 = range_2)
+                           range_1 = range_1, range_2 = range_2,
+                           alpha = 0.6)
     plot
 
   })

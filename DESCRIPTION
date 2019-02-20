@@ -1,7 +1,7 @@
 Package: CyAN
 Type: Package
 Title: Interact with CyAN data
-Version: 0.0.0.9100
+Version: 0.0.0.9200
 Author: Patrick Eslick <peslick@usgs.gov>
 Maintainer: Patrick Eslick <peslick@usgs.gov>
 Description: Tools for downloading, querying, and plotting data compiled for the
@@ -11,9 +11,12 @@ Imports:
   RSQLite,
   magrittr,
   dplyr,
+  dbplyr,
   ggplot2,
   lubridate,
-  shiny
+  shiny,
+  shinydashboard,
+  shinyFiles
 License: CC0
 Encoding: UTF-8
 LazyData: true
