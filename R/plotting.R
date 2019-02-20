@@ -19,6 +19,9 @@
 #' values in parameter 1 and parameter 2, respectively. The minimum
 #' should be given first, followed by the maximum.
 #'
+#' @param alpha number between 0 and 1 representing the opacity of the points
+#' 0 is fully transparent, and 1 is fully opaque
+#'
 #' @importFrom magrittr %>%
 #'
 #' @export
@@ -26,7 +29,8 @@
 plot_bivariate <- function(plot_data,
                            log_1 = FALSE, log_2 = FALSE,
                            method_highlight = NULL, flagged_results = NULL,
-                           range_1 = NULL, range_2 = NULL) {
+                           range_1 = NULL, range_2 = NULL,
+                           alpha = 1) {
 
   RESULT_VALUE.1 <- RESULT_VALUE.2 <- highlight <- is_flagged <- ".dplyr.var"
 
@@ -80,7 +84,7 @@ plot_bivariate <- function(plot_data,
   plot_data$RESULT_VALUE.2 <- as.numeric(plot_data$RESULT_VALUE.2)
 
   if(log_1) {
-    if(any(plot_data$RESULT_VALUE.1 <= 0)) {
+    if(any(plot_data$RESULT_VALUE.1 <= 0, na.rm = TRUE)) {
       message("Removing values of parameter 1 that are 0 or less")
       plot_data <- plot_data %>%
         dplyr::filter(RESULT_VALUE.1 > 0)
@@ -88,7 +92,7 @@ plot_bivariate <- function(plot_data,
   }
 
   if(log_2) {
-    if(any(plot_data$RESULT_VALUE.2 <= 0)) {
+    if(any(plot_data$RESULT_VALUE.2 <= 0, na.rm = TRUE)) {
       message("Removing values of parameter 2 that are 0 or less")
       plot_data <- plot_data %>%
         dplyr::filter(RESULT_VALUE.2 > 0)
@@ -101,7 +105,7 @@ plot_bivariate <- function(plot_data,
     ggplot2::theme(panel.background = ggplot2::element_blank(),
                    panel.grid.major = ggplot2::element_line(colour='grey60'),
                    panel.grid.minor = ggplot2::element_line(colour='grey60', linetype = "dashed")) +
-    ggplot2::geom_point(size=1.5) +
+    ggplot2::geom_point(size=1.5, alpha = alpha) +
     ggplot2::scale_color_manual(guide=FALSE, breaks = c(FALSE, TRUE), values=c("black", "red1")) +
     ggplot2::scale_shape_manual(guide=FALSE, values=c(19, 4)) +
     ggplot2::xlab(parameter_1_label) + ggplot2::ylab(parameter_2_label)

@@ -481,7 +481,8 @@ server <- function(input, output) {
     plot <- plot_bivariate(bivariate_data(),
                            log_1 = log_1, log_2 = log_2,
                            method_highlight = method_highlight,
-                           flagged_results = flagged_results)
+                           flagged_results = flagged_results,
+                           alpha = 0.6)
 
     removeNotification(id = plot_notification)
 
@@ -523,7 +524,8 @@ server <- function(input, output) {
                            log_1 = log_1, log_2 = log_2,
                            method_highlight = method_highlight,
                            flagged_results = flagged_results,
-                           range_1 = range_1, range_2 = range_2)
+                           range_1 = range_1, range_2 = range_2,
+                           alpha = 0.6)
     plot
 
   })
