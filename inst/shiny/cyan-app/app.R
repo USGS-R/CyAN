@@ -36,7 +36,8 @@ ui <- dashboardPage(
         selectInput("biv_color", "Highlight", choices=c("Parameter 1 methods" = "METHOD_ID.1",
                                                        "Parameter 2 methods" = "METHOD_ID.2")),
         uiOutput("method_highlight_controls"),
-        checkboxGroupInput("log_biv", "Log Scale", choices=c("x", "y"))
+        checkboxGroupInput("log_biv", "Log Scale", choices=c("x", "y")),
+        column(12, downloadLink("download_bivariate", "Download bivariate data"))
       )
     )
 
@@ -554,6 +555,17 @@ server <- function(input, output) {
       flag_range$y <- NULL
     }
   })
+
+  output$download_bivariate <- downloadHandler(
+    filename = function() {
+      "bivariate_data.csv"
+    },
+    content = function(file) {
+
+      write.csv(bivariate_data(), file)
+
+    }
+  )
 
 }
 #-------------------------------------------------------------------------------------------
