@@ -2,6 +2,7 @@
 
 export(add_GMT_time)
 export(add_solar_noon)
+export(add_trophic_status)
 export(connect_cyan)
 export(find_flagged)
 export(generate_location_index)
