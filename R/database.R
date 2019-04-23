@@ -418,7 +418,8 @@ add_GMT_time <- function(cyan_data) {
   gmt_time <- vector(length = nrow(output))
   for(i in 1:nrow(output)) {
     gmt_time[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
-                                                   tz = timezone[i]), tz = "GMT")
+                                                   tz = timezone[i]), tz = "GMT",
+                                format = "%Y-%m-%d %H:%M:%S %Z")
   }
   #If any timezones are blank, don't output a GMT time
   gmt_time[output$TZ == ""] <- NA
