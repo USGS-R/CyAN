@@ -6,6 +6,14 @@
 #'
 #' Launch the CyAN app in a browser
 #'
+#' @import shinydashboard
+#' @import shiny
+#' @import shinyFiles
+#' @import leaflet
+#' @import htmltools
+#' @import dplyr
+#' @import fs
+#'
 #' @export
 #'
 

@@ -18,8 +18,8 @@ connect_cyan <- function(path) {
   cyan_connection <- DBI::dbConnect(RSQLite::SQLite(), dbname = path)
   table_names <- DBI::dbListTables(cyan_connection)
 
-  if(!(all(c("ACTIVITY", "LOCATION", "RESULT") %in% table_names))) {
-    stop("not a valid copy of the cyan database")
+  if(!(all(c("ACTIVITY", "LOCATION", "RESULT", "PARAMETER", "METHOD") %in% table_names))) {
+    stop("not a valid database")
   }
 
   return(cyan_connection)
@@ -150,14 +150,14 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     PARAMETER_NAME <- UNITS <- WQP_METHOD_IDENTIFIER <- WQP_METHOD_CONTEXT <-
     WQP_METHOD_NAME <- WQP_METHOD_DESCRIPTION <- WQP_COLLECTION_METHOD_ID <-
     WQP_COLLECTION_METHOD_CONTEXT <- WQP_COLLECTION_METHOD_NAME <- LOCATION_TYPE <-
-    LOCAL_TZ <- STRFTIME <- SAMPLE_TYPE_DEFINITION <- YEAR <- ".dplyr.var"
+    LOCAL_TZ <- STRFTIME <- SAMPLE_TYPE_DEFINITION <- YEAR <- WQP_ACTIVITY_ID <- ".dplyr.var"
 
   location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
     dplyr::select(LOCATION_ID, LOCATION_TYPE, LATITUDE, LONGITUDE, DATUM, STATE_CODE, HUC,
                   LOCATION_NAME, LOCAL_TZ)
 
   activity <- dplyr::tbl(cyan_connection, "ACTIVITY") %>%
-    dplyr::select(ACTIVITY_ID, START_DATE, START_TIME, END_DATE, END_TIME, TZ,
+    dplyr::select(ACTIVITY_ID, WQP_ACTIVITY_ID, START_DATE, START_TIME, END_DATE, END_TIME, TZ,
                   LOCATION_ID, COLLECTION_METHOD_ID, SAMPLE_TYPE_CODE, ACTIVITY_DEPTH,
                   ACTIVITY_DEPTH_UNIT, ACTIVITY_TOP_DEPTH, ACTIVITY_TOP_DEPTH_UNIT,
                   ACTIVITY_BOTTOM_DEPTH, ACTIVITY_BOTTOM_DEPTH_UNIT,
@@ -201,7 +201,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     if(!is.numeric(south_latitude)) {
       stop("south_latitude should be a number, or left as NULL")
     }
-    if(north_latitude > 49.384472) {
+    if(south_latitude > 49.384472) {
       warning("given south_latitude is north of the contiguous 48 states")
     }
 
@@ -242,12 +242,27 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
   }
   if(!(is.null(parameters))) {
+    valid_parms <- parameter %>% dplyr::pull(PARAMETER_ID)
+    if(!all(parameters %in% valid_parms)) {
+      invalid <- paste(parameters[!(parameters %in% valid_parms)], collapse = " ")
+      stop(paste(invalid, "not valid parameter_ids"))
+    }
     result <- dplyr::filter(result, PARAMETER_ID %in% parameters)
   }
   if(!(is.null(minimum_tier))) {
+    if(!is.numeric(minimum_tier)) {
+      stop("minimum tier should be a number between 5.0 and 1.0")
+    }
+    if(minimum_tier < 1.0) {
+      stop("minimum tier number is 1.0")
+    }
     result <- dplyr::filter(result, TIER >= minimum_tier)
   }
   if(!(is.null(states))) {
+    if(!all(states %in% datasets::state.abb)) {
+      invalid_states <- states[!(states %in% datasets::state.abb)]
+      stop(paste(invalid_states, "not valid state abbreviations"))
+    }
     location <- dplyr::filter(location, STATE_CODE %in% states)
   }
 
@@ -403,7 +418,8 @@ add_GMT_time <- function(cyan_data) {
   gmt_time <- vector(length = nrow(output))
   for(i in 1:nrow(output)) {
     gmt_time[i] <- as.character(lubridate::ymd_hms(output$datetime[i],
-                                                   tz = timezone[i]), tz = "GMT")
+                                                   tz = timezone[i]), tz = "GMT",
+                                format = "%Y-%m-%d %H:%M:%S %Z")
   }
   #If any timezones are blank, don't output a GMT time
   gmt_time[output$TZ == ""] <- NA
@@ -492,7 +508,7 @@ add_trophic_status <- function(cyan_data) {
 
   #Calculate trophic status based on secchi depth
   cyan_data$TROPHIC_STATUS_INDEX[cyan_data$PARAMETER_ID == "P0002"] <-
-    16 - (14.41 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0002"]))
+    60 - (14.41 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0002"]))
   cyan_data$TROPHIC_STATUS_METHOD[cyan_data$PARAMETER_ID == "P0002"] <- "SD"
 
   #Calculate trophic status based on chlorophyll-a
