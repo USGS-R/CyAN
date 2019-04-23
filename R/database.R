@@ -507,7 +507,7 @@ add_trophic_status <- function(cyan_data) {
 
   #Calculate trophic status based on secchi depth
   cyan_data$TROPHIC_STATUS_INDEX[cyan_data$PARAMETER_ID == "P0002"] <-
-    16 - (14.41 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0002"]))
+    60 - (14.41 * log(cyan_data$RESULT_VALUE[cyan_data$PARAMETER_ID == "P0002"]))
   cyan_data$TROPHIC_STATUS_METHOD[cyan_data$PARAMETER_ID == "P0002"] <- "SD"
 
   #Calculate trophic status based on chlorophyll-a
