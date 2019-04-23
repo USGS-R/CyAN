@@ -260,7 +260,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
   }
   if(!(is.null(states))) {
     if(!all(states %in% datasets::state.abb)) {
-      invalid_states <- states[!(states %in% state.abb)]
+      invalid_states <- states[!(states %in% datasets::state.abb)]
       stop(paste(invalid_states, "not valid state abbreviations"))
     }
     location <- dplyr::filter(location, STATE_CODE %in% states)
