@@ -18,8 +18,8 @@ connect_cyan <- function(path) {
   cyan_connection <- DBI::dbConnect(RSQLite::SQLite(), dbname = path)
   table_names <- DBI::dbListTables(cyan_connection)
 
-  if(!(all(c("ACTIVITY", "LOCATION", "RESULT") %in% table_names))) {
-    stop("not a valid copy of the cyan database")
+  if(!(all(c("ACTIVITY", "LOCATION", "RESULT", "PARAMETER", "METHOD") %in% table_names))) {
+    stop("not a valid database")
   }
 
   return(cyan_connection)
@@ -201,7 +201,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     if(!is.numeric(south_latitude)) {
       stop("south_latitude should be a number, or left as NULL")
     }
-    if(north_latitude > 49.384472) {
+    if(south_latitude > 49.384472) {
       warning("given south_latitude is north of the contiguous 48 states")
     }
 
@@ -242,12 +242,27 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
   }
   if(!(is.null(parameters))) {
+    valid_parms <- parameter %>% dplyr::pull(PARAMETER_ID)
+    if(!all(parameters %in% valid_parms)) {
+      invalid <- paste(parameters[!(parameters %in% valid_parms)], collapse = " ")
+      stop(paste(invalid, "not valid parameter_ids"))
+    }
     result <- dplyr::filter(result, PARAMETER_ID %in% parameters)
   }
   if(!(is.null(minimum_tier))) {
+    if(!is.numeric(minimum_tier)) {
+      stop("minimum tier should be a number between 5.0 and 1.0")
+    }
+    if(minimum_tier < 1.0) {
+      stop("minimum tier number is 1.0")
+    }
     result <- dplyr::filter(result, TIER >= minimum_tier)
   }
   if(!(is.null(states))) {
+    if(!all(states %in% datasets::state.abb)) {
+      invalid_states <- states[!(states %in% state.abb)]
+      stop(paste(invalid_states, "not valid state abbreviations"))
+    }
     location <- dplyr::filter(location, STATE_CODE %in% states)
   }
 
