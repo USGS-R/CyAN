@@ -28,6 +28,7 @@ ui <- dashboardPage(
       menuItem("Configure", tabName = "db_configuration"),
       menuItem("Map", tabName = "map_screen"),
       menuItem("Bivariate Plot", tabName = "bivariate_plot"),
+      menuItem("Flags", tabName = "find_flagged"),
       conditionalPanel("input.sidebar == 'bivariate_plot'",
         uiOutput("bivariate_parameter_controls"),
         checkboxInput("biv_map_limit", label = "Limit to map bounds", value=TRUE),
@@ -133,6 +134,12 @@ ui <- dashboardPage(
         box(
           plotOutput("zoomed_bivariate_plot", brush = brushOpts(id = "flag_brush", resetOnNew = FALSE),
                      height = "700px")
+        )
+      ),
+      tabItem(tabName = "find_flagged",
+        box(
+          uiOutput("select_flag_ui"),
+          downloadButton("download_flagged", "Download flagged observations")
         )
       )
     )
@@ -564,6 +571,30 @@ server <- function(input, output) {
 
       write.csv(bivariate_data(), file)
 
+    }
+  )
+
+  output$select_flag_ui <- renderUI({
+
+    if(is.null(cyan_connection()))
+      return(NULL)
+
+    flags <- tbl(cyan_connection(), "FLAG_KEY") %>%
+      collect()
+    choices <- flags$FLAG_CODE
+    names(choices) <- flags$FLAG_DEFINITION
+
+    selectInput("select_flag", label = "Download results flagged with", choices = choices)
+
+  })
+
+  output$download_flagged <- downloadHandler(
+    filename = function() {
+      paste0(input$select_flag, "_flagged.csv")
+    },
+    content = function(file) {
+      data <- find_flagged(cyan_connection(), input$select_flag,  collect = TRUE)
+      write.csv(data, file)
     }
   )
 
