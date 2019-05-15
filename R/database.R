@@ -367,13 +367,13 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 #'
 #' @param flag_code the flag code of interest
 #'
-#' @return a vector of result_ids with the given flag
+#' @return a table of all results that have been flagged with the specified flag code
 #'
 #' @importFrom magrittr %>%
 #'
 #' @export
 
-find_flagged <- function(cyan_connection, flag_code) {
+find_flagged <- function(cyan_connection, flag_code, collect = TRUE) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
@@ -381,7 +381,19 @@ find_flagged <- function(cyan_connection, flag_code) {
     dplyr::filter(FLAG_CODE == flag_code) %>%
     dplyr::pull(RESULT_ID)
 
-  return(flags)
+  result <- dplyr::tbl(cyan_connection, "RESULT") %>%
+    dplyr::filter(RESULT_ID %in% flags)
+  activity <- dplyr::tbl(cyan_connection, "ACTIVITY")
+  location <- dplyr::tbl(cyan_connection, "LOCATION")
+
+  output <- result %>%
+    inner_join(activity) %>%
+    inner_join(location)
+
+  if(collect)
+    output <- collect(output)
+
+  return(output)
 
 }
 

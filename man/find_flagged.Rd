@@ -4,7 +4,7 @@
 \alias{find_flagged}
 \title{Find results with a particular flag}
 \usage{
-find_flagged(cyan_connection, flag_code)
+find_flagged(cyan_connection, flag_code, collect = TRUE)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
@@ -12,7 +12,7 @@ find_flagged(cyan_connection, flag_code)
 \item{flag_code}{the flag code of interest}
 }
 \value{
-a vector of result_ids with the given flag
+a table of all results that have been flagged with the specified flag code
 }
 \description{
 Check the QC_FLAGS table to find results that have been flagged with
