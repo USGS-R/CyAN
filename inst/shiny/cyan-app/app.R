@@ -593,7 +593,7 @@ server <- function(input, output) {
       paste0(input$select_flag, "_flagged.csv")
     },
     content = function(file) {
-      data <- find_flagged(cyan_connection(), input$select_flag,  collect = TRUE)
+      data <- find_flagged_data(cyan_connection(), input$select_flag,  collect = TRUE)
       write.csv(data, file)
     }
   )

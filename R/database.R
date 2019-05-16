@@ -373,7 +373,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 #'
 #' @export
 
-find_flagged <- function(cyan_connection, flag_code, collect = TRUE) {
+find_flagged_data <- function(cyan_connection, flag_code, collect = TRUE) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
@@ -394,7 +394,32 @@ find_flagged <- function(cyan_connection, flag_code, collect = TRUE) {
     output <- collect(output)
 
   return(output)
+}
 
+#' Find results with a particular flag
+#'
+#' Check the QC_FLAGS table to find results that have been flagged with
+#' the given flag code
+#'
+#' @param cyan_connection a CyAN database connection from \code{connect_cyan}
+#'
+#' @param flag_code the flag code of interest
+#'
+#' @return a vector of results
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+
+find_flagged <- function(cyan_connection, flag_code, collect = TRUE) {
+
+  FLAG_CODE <- RESULT_ID <- ".dplyr.var"
+
+  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS") %>%
+    dplyr::filter(FLAG_CODE == flag_code) %>%
+    dplyr::pull(RESULT_ID)
+
+  return(flags)
 }
 
 #' Add a column of GMT time to a cyan data query
