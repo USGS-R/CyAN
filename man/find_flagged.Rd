@@ -4,7 +4,7 @@
 \alias{find_flagged}
 \title{Find results with a particular flag}
 \usage{
-find_flagged(cyan_connection, flag_code, collect = TRUE)
+find_flagged(cyan_connection, flag_code)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
