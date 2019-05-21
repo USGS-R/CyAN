@@ -1,0 +1,46 @@
+[
+  {
+    "name": "CyAN",
+    "organization": "U.S. Geological Survey",
+    "description": "REPOSITORY_DESCRIPTION",
+    "version": "0.0.9300",
+    "status": "Development",
+
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain, CC0-1.0",
+          "URL": "https://github.com/USGS-R/blob/master/CyAN/LICENSE.md"
+        }
+      ]
+    },
+
+    "homepageURL": "https://github.com/USGS-R/CyAN",
+    "downloadURL": "https://github.com/USGS-R/CyAN/archive/master.zip",
+    "disclaimerURL": "https://github.com/USGS-R/CyAN/blob/master/LICENSE.md",
+    "repositoryURL": "https://github.com/USGS-R/CyAN",
+    "vcs": "git",
+
+    "laborHours": 200,
+
+    "tags": [
+      "R",
+      "HABs",
+      "shiny"
+    ],
+
+    "languages": [
+      "R"
+    ],
+
+    "contact": {
+      "name": "Patrick Eslick",
+      "email": "peslick@usgs.gov"
+    },
+
+    "date": {
+      "metadataLastUpdated": "2019-05-21"
+    }
+  }
+]
