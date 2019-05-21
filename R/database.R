@@ -367,6 +367,10 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 #'
 #' @param flag_code the flag code of interest
 #'
+#' @param collect a logical indicating whether the query will be pulled into
+#' a local tibble using dbplyr::collect. If you are planning on doing further
+#' selection or filtering, you may want not want to collect until you're ready
+#'
 #' @return a table of all results that have been flagged with the specified flag code
 #'
 #' @importFrom magrittr %>%
@@ -411,7 +415,7 @@ find_flagged_data <- function(cyan_connection, flag_code, collect = TRUE) {
 #'
 #' @export
 
-find_flagged <- function(cyan_connection, flag_code, collect = TRUE) {
+find_flagged <- function(cyan_connection, flag_code) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
