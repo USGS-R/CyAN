@@ -68,7 +68,7 @@ ui <- dashboardPage(
                         radioButtons("parm_logic", "Parameters:", choices=c("At least one", "All of")),
                         helpText(" "),
                         uiOutput("filter_points_parameter"),
-                        radioButtons("tiles", "View layer:", choices=c("NHD", "LandsatLook", "Streets"),
+                        radioButtons("tiles", "View layer:", choices=c("NHD", "Streets"),
                                      selected="Streets", inline=TRUE),
                         actionButton("show_points", "Show points")
           ),
@@ -256,15 +256,9 @@ server <- function(input, output) {
     if(input$tiles=="NHD") {
       leafletProxy("map") %>% clearTiles() %>% addWMSTiles(
         "http://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WMSServer?",
-        # "http://services.nationalmap.gov/arcgis/services/nhd/mapserver/WMSServer?",
         layers = "0",
         options = WMSTileOptions(format = "image/bmp", transparent = FALSE),
         attribution = "")
-    } else if(input$tiles=="LandsatLook") {
-      leafletProxy("map") %>% clearTiles() %>% addWMSTiles(
-        "https://landsatlook.usgs.gov/arcgis/services/LandsatLook/ImageServer/WMSServer?",
-        options = WMSTileOptions(format="image/png", transparaent = TRUE),
-        layers = "0")
     } else if(input$tiles=="Streets") {
       leafletProxy("map") %>% clearTiles() %>% addTiles(
         urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
@@ -599,7 +593,6 @@ server <- function(input, output) {
   )
 
 }
-#-------------------------------------------------------------------------------------------
-# Run the application
+
 shinyApp(ui = ui, server = server)
 
