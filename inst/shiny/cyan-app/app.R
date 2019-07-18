@@ -115,10 +115,15 @@ ui <- dashboardPage(
                                                   value = FALSE))
                         ),
                         fluidRow(
-                          column(3),
                           column(6, checkboxInput("add_trophic_status", "Add trophic status",
                                  value = FALSE)),
-                          column(3)
+                          column(6, checkboxInput("add_who_thresholds", "Add WHO thresholds",
+                                 value = FALSE))
+                        ),
+                        fluidRow(
+                          column(6, checkboxInput("add_epa_rec", "Add EPA thresholds",
+                                                  value = FALSE)),
+                          column(6)
                         ),
                         downloadButton("download_data")
 
@@ -134,6 +139,13 @@ ui <- dashboardPage(
         box(
           plotOutput("zoomed_bivariate_plot", brush = brushOpts(id = "flag_brush", resetOnNew = FALSE),
                      height = "700px")
+        ),
+        fluidRow(
+          column(6),
+          column(1, actionButton("flag_biv", "Apply flag")),
+          column(1, actionButton("unflag_biv", "Remove flag")),
+          column(1, textInput("initials", label = NULL, placeholder = "initials")),
+          column(1, actionButton("refresh", "Refresh"))
         )
       ),
       tabItem(tabName = "find_flagged",
@@ -384,6 +396,16 @@ server <- function(input, output) {
         output <- add_trophic_status(output)
       }
 
+      if(input$add_who_thresholds) {
+        showNotification("Adding WHO Thresholds...", id = download_notification, duration = NULL)
+        output <- add_WHO_category(output)
+      }
+
+      if(input$add_epa_rec) {
+        showNotification("Adding EPA Recreational Thresholds...", id = download_notification, duration = NULL)
+        output <- add_EPA_recreational_threshold(output)
+      }
+
       removeNotification(id = download_notification)
 
       write.csv(output, file)
@@ -464,6 +486,7 @@ server <- function(input, output) {
 
   bivariate_flagged <- reactive({
 
+    input$refresh
     flagged <- find_flagged(cyan_connection(), "MANBIV")
     flagged
 
@@ -554,6 +577,59 @@ server <- function(input, output) {
     } else {
       flag_range$x <- NULL
       flag_range$y <- NULL
+    }
+  })
+
+  observeEvent(input$flag_biv, {
+
+    range_1 <- flag_range$x
+    range_2 <- flag_range$y
+    flagged <- bivariate_flagged()
+
+    to_flag <- bivariate_data() %>%
+      filter(RESULT_VALUE.1 >= range_1[1],
+             RESULT_VALUE.1 <= range_1[2],
+             RESULT_VALUE.2 >= range_2[1],
+             RESULT_VALUE.2 <= range_2[2]) %>%
+      select(RESULT_ID.1, RESULT_ID.2) %>%
+      head(10000)
+
+    results_to_flag <- c(to_flag$RESULT_ID.1, to_flag$RESULT_ID.2)
+    results_to_flag <- results_to_flag[!(results_to_flag %in% flagged)]
+
+    if(length(results_to_flag) > 0) {
+
+      apply_flags(cyan_connection(), "MANBIV", input$initials, results_to_flag)
+
+    }
+
+  })
+
+  observeEvent(input$unflag_biv, {
+
+    range_1 <- flag_range$x
+    range_2 <- flag_range$y
+
+    if(!is.null(range_1)) {
+
+      flagged <- bivariate_flagged()
+
+      to_unflag <- bivariate_data() %>%
+        filter(RESULT_VALUE.1 >= range_1[1],
+               RESULT_VALUE.1 <= range_1[2],
+               RESULT_VALUE.2 >= range_2[1],
+               RESULT_VALUE.2 <= range_2[2]) %>%
+        select(RESULT_ID.1, RESULT_ID.2) %>%
+        head(10000)
+
+      results_to_unflag <- c(to_unflag$RESULT_ID.1, to_unflag$RESULT_ID.2)
+      results_to_unflag <- results_to_unflag[results_to_unflag %in% flagged]
+
+      if(length(results_to_unflag) > 0) {
+
+        remove_flags(cyan_connection(), "MANBIV", results_to_unflag)
+
+      }
     }
   })
 

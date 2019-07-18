@@ -23,7 +23,7 @@ To use most of the functions of the app, you will need to connect the app to you
 
 You can filter which data points appear on the map using the panel in the upper right corner of the map screen. Points will be shown when you click the "Show points" button. Only points in your current zoom level will be shown on the map. Plotting many points at once can make the map screen run slowly, so it may be smoother to zoom into your region of interest first before showing the points on the map.
 
-You can also change the base layer from this panel. Available layers include the default street map, NHD, and LandsatLook. Some layers may not show up at certain zoom levels.
+You can also change the base layer from this panel.
 
 ### Downloading data
 
