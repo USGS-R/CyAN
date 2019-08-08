@@ -408,7 +408,7 @@ server <- function(input, output) {
 
       removeNotification(id = download_notification)
 
-      write.csv(output, file)
+      write.csv(output, file, row.names = FALSE, na = "")
 
     }
   )
@@ -639,7 +639,7 @@ server <- function(input, output) {
     },
     content = function(file) {
 
-      write.csv(bivariate_data(), file)
+      write.csv(bivariate_data(), file, row.names = FALSE, na = "")
 
     }
   )
@@ -664,7 +664,7 @@ server <- function(input, output) {
     },
     content = function(file) {
       data <- find_flagged_data(cyan_connection(), input$select_flag,  collect = TRUE)
-      write.csv(data, file)
+      write.csv(data, file, row.names = FALSE, na = "")
     }
   )
 
