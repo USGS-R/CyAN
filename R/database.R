@@ -67,8 +67,10 @@ generate_location_index <- function(cyan_connection) {
   location_index <- location %>%
     dplyr::inner_join(activity, by = "LOCATION_ID") %>%
     dplyr::inner_join(result, by = "ACTIVITY_ID") %>%
-    dplyr::select(LOCATION_NAME, LONGITUDE, LATITUDE, PARAMETER_ID) %>%
+    dplyr::select(LOCATION_ID, PARAMETER_ID) %>%
     dplyr::distinct() %>%
+    dplyr::left_join(location, by = "LOCATION_ID") %>%
+    dplyr::select(LOCATION_NAME, LATITUDE, LONGITUDE, PARAMETER_ID) %>%
     dplyr::collect()
 
   return(location_index)
