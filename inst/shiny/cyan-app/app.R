@@ -191,7 +191,14 @@ server <- function(input, output) {
   })
 
   location_index <- reactive({
-    index
+    if(is.null(cyan_connection()))
+      return(data.frame(LOCATION_NAME = "N/A", LATITUDE = 0, LONGITUDE = 0, PARAMETER_ID = "P0001"))
+
+    loc_notification <- showNotification("Indexing database...", duration = NULL)
+    locations <- generate_location_index(cyan_connection())
+    removeNotification(loc_notification)
+
+    locations
   })
 
   output$filter_points_parameter <- renderUI({
