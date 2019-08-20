@@ -1,6 +1,6 @@
 ## Introduction
 
-This app is used to map, download, and visualize CyAN data. Most functions of the app require a connection to a CyAN database file. Until the data release accompanying this app, if you are a CyAN team member or reviewer, you can get a copy of the database by contacting Patrick Eslick <peslick@usgs.gov>. 
+This app is used to map, download, and visualize data using the CyAN database schema and parameter list. Most functions of the app require a connection to a CyAN database file. Questions about the database or the app may be directed to Patrick Eslick <peslick@usgs.gov>. 
 
 The rest of this page explains how to use the app. Each heading represents a menu item from the sidebar. The sidebar menu can be opened or closed at any time by clicking the icon next to "CyAN" in the upper left corner.
 
