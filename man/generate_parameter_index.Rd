@@ -2,18 +2,25 @@
 % Please edit documentation in R/database.R
 \name{generate_parameter_index}
 \alias{generate_parameter_index}
-\title{Generate a list of parameter identifiers and their short names}
+\title{Generate a table of parameter identifiers and their short names}
 \usage{
 generate_parameter_index(cyan_connection)
 }
 \arguments{
-\item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
+\item{cyan_connection}{a CyAN database connection from \code{connect_cyan()}}
 }
 \value{
 a data frame of parameter identifiers and their associated
 short names
 }
 \description{
-Lookup table relating each arbitrary parameter identifier to the short
-version of the parameter name
+Generate a table of parameter identifiers and their short names
+}
+\examples{
+#Connect to the example database bundled with CyAN
+path <- system.file("extdata", "example.db", package = "CyAN")
+db_connection <- connect_cyan(path)
+#Generate the parameter index
+parameter_index <- generate_parameter_index(db_connection)
+
 }

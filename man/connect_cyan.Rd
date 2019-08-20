@@ -7,12 +7,18 @@
 connect_cyan(path)
 }
 \arguments{
-\item{path}{the full path to the database}
+\item{path}{a character string giving the path to the database}
 }
 \value{
 a SQLite database connection
 }
 \description{
-Given a file path, connect to the CyAN database. The database can be
-downloaded manually from the FTP site, or using the download function
+Generate a connection to the CyAN database or another sqlite database using
+the CyAN schema and parameter table
+}
+\examples{
+#Connect to the example database bundled with CyAN
+path <- system.file("extdata", "example.db", package = "CyAN")
+db_connection <- connect_cyan(path)
+
 }

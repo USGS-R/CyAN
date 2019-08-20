@@ -7,12 +7,20 @@
 generate_location_index(cyan_connection)
 }
 \arguments{
-\item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
+\item{cyan_connection}{a CyAN database connection from \code{connect_cyan()}}
 }
 \value{
 a data frame of all unique combinations of location and parameter
 }
 \description{
 Based on the CyAN database connection, generate an index of all unique combinations
-of locations and parameters that have been measured there
+of locations and the parameters that have been collected there
+}
+\examples{
+#Connect to the example database bundled with CyAN
+path <- system.file("extdata", "example.db", package = "CyAN")
+db_connection <- connect_cyan(path)
+#Generate the location index
+location_index <- generate_location_index(db_connection)
+
 }

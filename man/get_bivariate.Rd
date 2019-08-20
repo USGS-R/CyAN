@@ -16,7 +16,7 @@ of interest}
 
 \item{collect}{a logical indicating whether the query will be pulled into
 a local tibble using dbplyr::collect. If you are planning on doing further
-selection or filtering, you may want not want to collect until you're ready}
+selection or filtering, you may want not want to collect until you're ready.}
 
 \item{north_latitude, south_latitude}{numbers indicating the northern most
 and sothern most latitude that will be included in the query. Latitude
@@ -33,11 +33,24 @@ meridian.}
 if collect is FALSE, the query will be generated, but not collected.
 See the documentation on \code{collect} for details. Otherwise, if collect
 is TRUE, the query will be pulled into memory and returned as a tibble.
-Returns a wide data frame, with a shared activity, depth, and depth_unit
-columns, and all other columns suffixed with .1 or .2 for the two parameters.
+Returns a wide data frame, with a shared columns related to the activity,
+and columns related to the analytical result suffixed with a ".1" for parameter
+1 and ".2" for parameter 2.
 }
 \description{
 Find sampling activities that have associated measurements of two parameters
 of interest - helpful for bivariate plotting/ investigating the relationship
 between two parameters.
+}
+\examples{
+#Connect to the example database bundled with CyAN
+path <- system.file("extdata", "example.db", package = "CyAN")
+db_connection <- connect_cyan(path)
+
+#Get simaltaneous observations of secchi depth (P0002) and chlorophyll-a (P0051)
+biv_secchi_chla <- get_bivariate(db_connection,
+                                 parameter_1 = "P0002", parameter_2 = "P0051",
+                                 north_latitude = 37.818, south_latitude = 37.714,
+                                 west_longitude = -98.028, east_longitude = -97.735)
+
 }
