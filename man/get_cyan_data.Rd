@@ -61,8 +61,8 @@ ks_chl_2016 <- get_cyan_data(db_connection,
                              states = "KS")
 
 #Get chlorophyll-a data within a latitude longitude bounding box. If you
-need to reference the parameter table to find parameter codes, you can use
-generate_parameter_index()
+#need to reference the parameter table to find parameter codes, you can use
+#generate_parameter_index()
 chla_2017 <- get_cyan_data(db_connection,
                            north_latitude = 37.818, south_latitude = 37.714,
                            west_longitude = -98.028, east_longitude = -97.735,

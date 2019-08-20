@@ -9,8 +9,7 @@ plot_bivariate(plot_data, log_1 = FALSE, log_2 = FALSE,
   range_2 = NULL, alpha = 1)
 }
 \arguments{
-\item{plot_data}{bivariate data to plot - should be collected
-before the plotting function}
+\item{plot_data}{bivariate data from \code{get_bivariate()}}
 
 \item{log_1, log_2}{logicals indicating whether to use a log
 scale for parameter 1 and parameter 2, respectively}
@@ -19,7 +18,7 @@ scale for parameter 1 and parameter 2, respectively}
 with this method will appear in red instead of black}
 
 \item{flagged_results}{a vector of flagged results - could be
-obtained using the \code{find_flagged} function. These results will
+obtained using the \code{find_flagged()} function. These results will
 be plotted with an x symbol rather than a filled circle}
 
 \item{range_1, range_2}{numeric vectors specifiying the range for
@@ -28,6 +27,9 @@ should be given first, followed by the maximum.}
 
 \item{alpha}{number between 0 and 1 representing the opacity of the points
 0 is fully transparent, and 1 is fully opaque}
+}
+\value{
+a ggplot2 plot
 }
 \description{
 Plot data retrieved using \code{get_bivariate}

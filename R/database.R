@@ -151,8 +151,8 @@ generate_parameter_index <- function(cyan_connection) {
 #'                              states = "KS")
 #'
 #' #Get chlorophyll-a data within a latitude longitude bounding box. If you
-#' need to reference the parameter table to find parameter codes, you can use
-#' generate_parameter_index()
+#' #need to reference the parameter table to find parameter codes, you can use
+#' #generate_parameter_index()
 #' chla_2017 <- get_cyan_data(db_connection,
 #'                            north_latitude = 37.818, south_latitude = 37.714,
 #'                            west_longitude = -98.028, east_longitude = -97.735,
@@ -333,19 +333,15 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #' between two parameters.
 #'
 #' @param cyan_connection a CyAN database connection from \code{connect_cyan}
-#'
 #' @param parameter_1,parameter_2 CyAN parameter codes for the two parameters
 #' of interest
-#'
 #' @param north_latitude,south_latitude numbers indicating the northern most
 #' and sothern most latitude that will be included in the query. Latitude
 #' should be given as a positive number of degrees north of the equator.
-#'
 #' @param west_longitude,east_longitude nunbers indicating the western most
 #' and eastern most latitude that will be included in the query. Longitude
 #' should be given as a negative number of decimal degrees west of the prime
 #' meridian.
-#'
 #' @param years numeric vector of years that will be included in the query
 #'
 #' @return if collect is FALSE, the query will be generated, but not collected.
@@ -364,8 +360,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #' biv_secchi_chla <- get_bivariate(db_connection,
 #'                                  parameter_1 = "P0002", parameter_2 = "P0051",
 #'                                  north_latitude = 37.818, south_latitude = 37.714,
-#'                                  west_longitude = -98.028, east_longitude = -97.735,
-#'                                  collect = TRUE)
+#'                                  west_longitude = -98.028, east_longitude = -97.735)
 #'
 #' @importFrom magrittr %>%
 #'
@@ -427,7 +422,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 #'
 #' #Get all of the chlorophyll and chlorophyll-a data (parameter id P0051 & P0054)
 #' #or the state of Kansas in the year 2016
-#' ks_chl_2016 <- get_cyan_data(db_connection,
+#' ks_chl_2016 <- get_cyan_data(db_connection, collect = TRUE,
 #'                              years = 2016,
 #'                              parameters = c("P0051", "P0054"),
 #'                              states = "KS")
@@ -488,10 +483,10 @@ add_GMT_time <- function(cyan_data) {
 #'
 #' #Get all of the chlorophyll and chlorophyll-a data (parameter id P0051 & P0054)
 #' #or the state of Kansas in the year 2016
-#' ks_chl_2016 <- get_cyan_data(db_connection,
+#' ks_chl_2016 <- get_cyan_data(db_connection, collect = TRUE,
 #'                              years = 2016,
 #'                              parameters = c("P0051", "P0054"),
-#'                              states = "KS")
+#'                              states = "KS",)
 #'
 #' #Add logical columns for solar noon and extended solar noon
 #' ks_chl_2016_wsolarnoon <- add_solar_noon(ks_chl_2016)
@@ -557,7 +552,7 @@ add_solar_noon <- function(cyan_data) {
 #'
 #' #Get all of the chlorophyll and chlorophyll-a data (parameter id P0051 & P0054)
 #' #or the state of Kansas in the year 2016
-#' ks_chl_2016 <- get_cyan_data(db_connection,
+#' ks_chl_2016 <- get_cyan_data(db_connection, collect = TRUE,
 #'                              years = 2016,
 #'                              parameters = c("P0051", "P0054"),
 #'                              states = "KS")
@@ -626,7 +621,7 @@ add_trophic_status <- function(cyan_data) {
 #'
 #' #Get all of the chlorophyll and chlorophyll-a data (parameter id P0051 & P0054)
 #' #or the state of Kansas in the year 2016
-#' ks_chl_2016 <- get_cyan_data(db_connection,
+#' ks_chl_2016 <- get_cyan_data(db_connection, collect = TRUE,
 #'                              years = 2016,
 #'                              parameters = c("P0051", "P0054"),
 #'                              states = "KS")
@@ -686,12 +681,12 @@ add_WHO_category <- function(cyan_data) {
 #' db_connection <- connect_cyan(path)
 #'
 #' #Get all of the data for microcystis and cylindrospermopsin
-#' ks_toxins <- get_cyan_data(db_connection,
+#' ks_toxins <- get_cyan_data(db_connection, collect = TRUE,
 #'                              parameters = c("P0051", "P0054"),
 #'                              states = "KS")
 #'
 #' #Add any applicable recreational for toxins
-#' ks_toxins_wEPA <- add_EPA_recreational_threshold(cyan_data)
+#' ks_toxins_wEPA <- add_EPA_recreational_threshold(ks_toxins)
 #'
 #' @importFrom magrittr %>%
 #'

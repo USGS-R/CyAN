@@ -18,9 +18,6 @@
 #'
 #' @return a ggplot2 plot
 #'
-#' @examples
-#'
-#'
 #' @importFrom magrittr %>%
 #'
 #' @export

@@ -4,7 +4,7 @@
 \alias{get_bivariate}
 \title{Find simaltaneous measurements of two parameters}
 \usage{
-get_bivariate(cyan_connection, parameter_1, parameter_2, collect = FALSE,
+get_bivariate(cyan_connection, parameter_1, parameter_2,
   north_latitude = NULL, south_latitude = NULL,
   west_longitude = NULL, east_longitude = NULL, years = NULL)
 }
@@ -13,10 +13,6 @@ get_bivariate(cyan_connection, parameter_1, parameter_2, collect = FALSE,
 
 \item{parameter_1, parameter_2}{CyAN parameter codes for the two parameters
 of interest}
-
-\item{collect}{a logical indicating whether the query will be pulled into
-a local tibble using dbplyr::collect. If you are planning on doing further
-selection or filtering, you may want not want to collect until you're ready.}
 
 \item{north_latitude, south_latitude}{numbers indicating the northern most
 and sothern most latitude that will be included in the query. Latitude
