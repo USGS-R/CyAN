@@ -68,7 +68,7 @@ ui <- dashboardPage(
                         radioButtons("parm_logic", "Parameters:", choices=c("At least one", "All of")),
                         helpText(" "),
                         uiOutput("filter_points_parameter"),
-                        radioButtons("tiles", "View layer:", choices=c("NHD", "LandsatLook", "Streets"),
+                        radioButtons("tiles", "View layer:", choices=c("NHD", "Streets"),
                                      selected="Streets", inline=TRUE),
                         actionButton("show_points", "Show points")
           ),
@@ -115,10 +115,15 @@ ui <- dashboardPage(
                                                   value = FALSE))
                         ),
                         fluidRow(
-                          column(3),
                           column(6, checkboxInput("add_trophic_status", "Add trophic status",
                                  value = FALSE)),
-                          column(3)
+                          column(6, checkboxInput("add_who_thresholds", "Add WHO thresholds",
+                                 value = FALSE))
+                        ),
+                        fluidRow(
+                          column(6, checkboxInput("add_epa_rec", "Add EPA thresholds",
+                                                  value = FALSE)),
+                          column(6)
                         ),
                         downloadButton("download_data")
 
@@ -134,6 +139,13 @@ ui <- dashboardPage(
         box(
           plotOutput("zoomed_bivariate_plot", brush = brushOpts(id = "flag_brush", resetOnNew = FALSE),
                      height = "700px")
+        ),
+        fluidRow(
+          column(6),
+          column(1, actionButton("flag_biv", "Apply flag")),
+          column(1, actionButton("unflag_biv", "Remove flag")),
+          column(1, textInput("initials", label = NULL, placeholder = "initials")),
+          column(1, actionButton("refresh", "Refresh"))
         )
       ),
       tabItem(tabName = "find_flagged",
@@ -179,7 +191,14 @@ server <- function(input, output) {
   })
 
   location_index <- reactive({
-    index
+    if(is.null(cyan_connection()))
+      return(data.frame(LOCATION_NAME = "N/A", LATITUDE = 0, LONGITUDE = 0, PARAMETER_ID = "P0001"))
+
+    loc_notification <- showNotification("Indexing database...", duration = NULL)
+    locations <- generate_location_index(cyan_connection())
+    removeNotification(loc_notification)
+
+    locations
   })
 
   output$filter_points_parameter <- renderUI({
@@ -256,15 +275,9 @@ server <- function(input, output) {
     if(input$tiles=="NHD") {
       leafletProxy("map") %>% clearTiles() %>% addWMSTiles(
         "http://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WMSServer?",
-        # "http://services.nationalmap.gov/arcgis/services/nhd/mapserver/WMSServer?",
         layers = "0",
         options = WMSTileOptions(format = "image/bmp", transparent = FALSE),
         attribution = "")
-    } else if(input$tiles=="LandsatLook") {
-      leafletProxy("map") %>% clearTiles() %>% addWMSTiles(
-        "https://landsatlook.usgs.gov/arcgis/services/LandsatLook/ImageServer/WMSServer?",
-        options = WMSTileOptions(format="image/png", transparaent = TRUE),
-        layers = "0")
     } else if(input$tiles=="Streets") {
       leafletProxy("map") %>% clearTiles() %>% addTiles(
         urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
@@ -390,9 +403,19 @@ server <- function(input, output) {
         output <- add_trophic_status(output)
       }
 
+      if(input$add_who_thresholds) {
+        showNotification("Adding WHO Thresholds...", id = download_notification, duration = NULL)
+        output <- add_WHO_category(output)
+      }
+
+      if(input$add_epa_rec) {
+        showNotification("Adding EPA Recreational Thresholds...", id = download_notification, duration = NULL)
+        output <- add_EPA_recreational_threshold(output)
+      }
+
       removeNotification(id = download_notification)
 
-      write.csv(output, file)
+      write.csv(output, file, row.names = FALSE, na = "")
 
     }
   )
@@ -457,7 +480,6 @@ server <- function(input, output) {
     data_notification <- showNotification("Getting data...", type = "message", duration = NULL)
 
     data <- get_bivariate(cyan_connection(), input$biv_parm_1, input$biv_parm_2,
-                          collect = TRUE,
                           north_latitude = north_latitude, south_latitude = south_latitude,
                           west_longitude = west_longitude, east_longitude = east_longitude,
                           years = input$biv_years[1]:input$biv_years[2])
@@ -470,6 +492,7 @@ server <- function(input, output) {
 
   bivariate_flagged <- reactive({
 
+    input$refresh
     flagged <- find_flagged(cyan_connection(), "MANBIV")
     flagged
 
@@ -563,13 +586,66 @@ server <- function(input, output) {
     }
   })
 
+  observeEvent(input$flag_biv, {
+
+    range_1 <- flag_range$x
+    range_2 <- flag_range$y
+    flagged <- bivariate_flagged()
+
+    to_flag <- bivariate_data() %>%
+      filter(RESULT_VALUE.1 >= range_1[1],
+             RESULT_VALUE.1 <= range_1[2],
+             RESULT_VALUE.2 >= range_2[1],
+             RESULT_VALUE.2 <= range_2[2]) %>%
+      select(RESULT_ID.1, RESULT_ID.2) %>%
+      head(10000)
+
+    results_to_flag <- c(to_flag$RESULT_ID.1, to_flag$RESULT_ID.2)
+    results_to_flag <- results_to_flag[!(results_to_flag %in% flagged)]
+
+    if(length(results_to_flag) > 0) {
+
+      apply_flags(cyan_connection(), "MANBIV", input$initials, results_to_flag)
+
+    }
+
+  })
+
+  observeEvent(input$unflag_biv, {
+
+    range_1 <- flag_range$x
+    range_2 <- flag_range$y
+
+    if(!is.null(range_1)) {
+
+      flagged <- bivariate_flagged()
+
+      to_unflag <- bivariate_data() %>%
+        filter(RESULT_VALUE.1 >= range_1[1],
+               RESULT_VALUE.1 <= range_1[2],
+               RESULT_VALUE.2 >= range_2[1],
+               RESULT_VALUE.2 <= range_2[2]) %>%
+        select(RESULT_ID.1, RESULT_ID.2) %>%
+        head(10000)
+
+      results_to_unflag <- c(to_unflag$RESULT_ID.1, to_unflag$RESULT_ID.2)
+      results_to_unflag <- results_to_unflag[results_to_unflag %in% flagged]
+
+      if(length(results_to_unflag) > 0) {
+
+        remove_flags(cyan_connection(), "MANBIV", results_to_unflag)
+
+      }
+    }
+  })
+
   output$download_bivariate <- downloadHandler(
     filename = function() {
       "bivariate_data.csv"
     },
     content = function(file) {
 
-      write.csv(bivariate_data(), file)
+      write.csv(bivariate_data(), file, row.names = FALSE, na = "")
 
     }
   )
@@ -594,12 +670,11 @@ server <- function(input, output) {
     },
     content = function(file) {
       data <- find_flagged_data(cyan_connection(), input$select_flag,  collect = TRUE)
-      write.csv(data, file)
+      write.csv(data, file, row.names = FALSE, na = "")
     }
   )
 
 }
-#-------------------------------------------------------------------------------------------
-# Run the application
+
 shinyApp(ui = ui, server = server)
 

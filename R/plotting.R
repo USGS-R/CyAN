@@ -2,25 +2,21 @@
 #'
 #' Plot data retrieved using \code{get_bivariate}
 #'
-#' @param plot_data bivariate data to plot - should be collected
-#' before the plotting function
-#'
+#' @param plot_data bivariate data from \code{get_bivariate()}
 #' @param log_1,log_2 logicals indicating whether to use a log
 #' scale for parameter 1 and parameter 2, respectively
-#'
 #' @param method_highlight a method to be highlighted - points analyzed
 #' with this method will appear in red instead of black
-#'
 #' @param flagged_results a vector of flagged results - could be
-#' obtained using the \code{find_flagged} function. These results will
+#' obtained using the \code{find_flagged()} function. These results will
 #' be plotted with an x symbol rather than a filled circle
-#'
 #' @param range_1,range_2 numeric vectors specifiying the range for
 #' values in parameter 1 and parameter 2, respectively. The minimum
 #' should be given first, followed by the maximum.
-#'
 #' @param alpha number between 0 and 1 representing the opacity of the points
 #' 0 is fully transparent, and 1 is fully opaque
+#'
+#' @return a ggplot2 plot
 #'
 #' @importFrom magrittr %>%
 #'

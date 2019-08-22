@@ -7,7 +7,7 @@
 add_solar_noon(cyan_data)
 }
 \arguments{
-\item{cyan_data}{a data frame from \code{get_cyan_data} with
+\item{cyan_data}{a data frame from \code{get_cyan_data()} with
 \code{collect = TRUE}}
 }
 \value{
@@ -18,4 +18,21 @@ the sample was taken during extended solar noon.
 \description{
 Solar noon is defined as 1000 - 1400, extended solar noon is defined as
 0900 - 1500
+}
+\examples{
+
+#Connect to the example database bundled with CyAN
+path <- system.file("extdata", "example.db", package = "CyAN")
+db_connection <- connect_cyan(path)
+
+#Get all of the chlorophyll and chlorophyll-a data (parameter id P0051 & P0054)
+#or the state of Kansas in the year 2016
+ks_chl_2016 <- get_cyan_data(db_connection, collect = TRUE,
+                             years = 2016,
+                             parameters = c("P0051", "P0054"),
+                             states = "KS",)
+
+#Add logical columns for solar noon and extended solar noon
+ks_chl_2016_wsolarnoon <- add_solar_noon(ks_chl_2016)
+
 }

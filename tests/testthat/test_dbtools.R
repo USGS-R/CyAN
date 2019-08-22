@@ -1,7 +1,7 @@
 context("database connection and querying")
 
 test_that("database connection works when pointed to valid database file", {
-  expect_error(connect_cyan("test_invalid.db"), "valid database")
+  expect_error(connect_cyan("test_invalid.db"), "valid CyAN database")
   expect_error(connect_cyan("not_here.db"), "file path")
   expect_is(connect_cyan("test.db"), "SQLiteConnection")
 })
@@ -77,7 +77,7 @@ test_that("filtering by time gives the expected results", {
 
 test_that("bivariate data pull gives the expected results", {
   cyan <- connect_cyan("test.db")
-  chl_sd <- get_bivariate(cyan, parameter_1 = "P0051", parameter_2 = "P0002", collect = TRUE)
+  chl_sd <- get_bivariate(cyan, parameter_1 = "P0051", parameter_2 = "P0002")
   expect_equal(nrow(chl_sd), 5)
   expect_true(all(chl_sd$PARAMETER_ID.1 == "P0051") & all(chl_sd$PARAMETER_ID.2 == "P0002"))
 })

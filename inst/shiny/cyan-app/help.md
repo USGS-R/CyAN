@@ -1,6 +1,6 @@
 ## Introduction
 
-This app is used to map, download, and visualize CyAN data. Most functions of the app require a connection to a CyAN database file. Until the data release accompanying this app, if you are a CyAN team member or reviewer, you can get a copy of the database by contacting Patrick Eslick <peslick@usgs.gov>. 
+This app is used to map, download, and visualize data using the CyAN database schema and parameter list. Most functions of the app require a connection to a CyAN database file. Questions about the database or the app may be directed to Patrick Eslick <peslick@usgs.gov>. 
 
 The rest of this page explains how to use the app. Each heading represents a menu item from the sidebar. The sidebar menu can be opened or closed at any time by clicking the icon next to "CyAN" in the upper left corner.
 
@@ -23,7 +23,7 @@ To use most of the functions of the app, you will need to connect the app to you
 
 You can filter which data points appear on the map using the panel in the upper right corner of the map screen. Points will be shown when you click the "Show points" button. Only points in your current zoom level will be shown on the map. Plotting many points at once can make the map screen run slowly, so it may be smoother to zoom into your region of interest first before showing the points on the map.
 
-You can also change the base layer from this panel. Available layers include the default street map, NHD, and LandsatLook. Some layers may not show up at certain zoom levels.
+You can also change the base layer from this panel.
 
 ### Downloading data
 
