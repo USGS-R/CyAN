@@ -25,7 +25,7 @@ db_connection <- connect_cyan(path)
 
 #Get all of the data for microcystis and cylindrospermopsin
 ks_toxins <- get_cyan_data(db_connection, collect = TRUE,
-                             parameters = c("P0051", "P0054"),
+                             parameters = c("P0073", "P0074"),
                              states = "KS")
 
 #Add any applicable recreational for toxins
