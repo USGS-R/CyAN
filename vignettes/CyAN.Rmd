@@ -1,0 +1,77 @@
+---
+title: "CyAN"
+author: "Patrick Eslick"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This package is intended to help explore, query, and export data compiled for the CyAN project. The data was downloaded from the Water Quality Portal and loaded into an SQLite database to make querying and processing the data easier. Supplementary information on analytic methods was compiled.
+
+## Connecting to a database  
+
+To begin working with the data, first connect to a local copy of the database. This vignette will use the small example database that is included with the package.
+
+```{r message=FALSE, warning=FALSE}
+library(CyAN)
+library(dplyr)
+
+path <- system.file("extdata", "example.db", package = "CyAN")
+cyan_db <- connect_cyan(path)
+
+```
+
+## Querying  
+
+The querying function `get_cyan_data()` allows filtering by latitude, longitude, year, parameter, tier, and state. Additional filtering can be done using `dplyr` functions like filter and select. The query isn't actually retrieved from the database unless `collect = TRUE` is used, or until the `collect()` function from dplyr is used.
+
+Querying by parameter requires use of the CyAN parameter code built in to the database. To quickly see a list of parameters, you can use `generate_parameter_index()`.
+
+```{r, message=FALSE, warning=FALSE}
+parameter_list <- generate_parameter_index(cyan_db)
+head(parameter_list)
+
+#Get all of the Chlorophyll-a data available in Kansas
+ks_chla <- get_cyan_data(cyan_db, collect = TRUE,
+                         parameters = "P0051",
+                         states = "KS")
+
+#Before collecting the data, limit by result values greater than 11.80 ug/L.
+ks_chla_high <- get_cyan_data(cyan_db, collect = FALSE,
+                              parameters = "P0051",
+                              states = "KS") %>%
+  filter(RESULT_VALUE > 11.80) %>%
+  collect()
+
+```
+
+## Adding columns 
+
+Some functions have been included in the package that provide additional calculated or categorical columns such as trophic status (`add_trophic_status()`), time in GMT (`add_GMT_time()`), and solar noon (`add_solar_noon()`). The documentation for each function provides more detail.
+
+```{r, message=FALSE, warning=FALSE}
+
+ks_chla <- ks_chla %>%
+  add_trophic_status() %>%
+  add_GMT_time() %>%
+  add_solar_noon()
+
+```
+
+## Bivariate data  
+
+The package also provides tools to get and plot bivariate data. This is not intended to provide a full bivariate analysis, but to give a cursory preview of the relationships between variables. The basic function used to query for bivariate data is `get_bivariate()`, and the plotting function is `plot_bivariate()`.
+
+```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE}
+
+#Look at the relationship between total phosphorus and chlorophyll-a
+biv_data <- get_bivariate(cyan_db,
+                          parameter_1 = "P0031", #Total phosphorus parameter
+                          parameter_2 = "P0051", #Chlorophyll-a parameter,
+                          states = "KS")
+plot_bivariate(biv_data, log_1 = TRUE, log_2 = TRUE)
+
+```
