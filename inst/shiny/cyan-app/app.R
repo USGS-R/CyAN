@@ -480,7 +480,6 @@ server <- function(input, output) {
     data_notification <- showNotification("Getting data...", type = "message", duration = NULL)
 
     data <- get_bivariate(cyan_connection(), input$biv_parm_1, input$biv_parm_2,
-                          collect = TRUE,
                           north_latitude = north_latitude, south_latitude = south_latitude,
                           west_longitude = west_longitude, east_longitude = east_longitude,
                           years = input$biv_years[1]:input$biv_years[2])
