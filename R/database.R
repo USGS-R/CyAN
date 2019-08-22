@@ -343,6 +343,9 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #' should be given as a negative number of decimal degrees west of the prime
 #' meridian.
 #' @param years numeric vector of years that will be included in the query
+#' @param states a character vector of the postal codes for the states to be
+#' included in the query. Usually, this would not be used if querying by
+#' latitude and longitude.
 #'
 #' @return if collect is FALSE, the query will be generated, but not collected.
 #' See the documentation on \code{collect} for details. Otherwise, if collect
@@ -369,7 +372,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                           north_latitude = NULL, south_latitude = NULL,
                           west_longitude = NULL, east_longitude = NULL,
-                          years = NULL) {
+                          years = NULL, states = NULL) {
 
   PARAMETER_ID <- ".dplyr.var"
 
@@ -378,6 +381,7 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                             east_longitude = east_longitude,
                             west_longitude = west_longitude,
                             years = years,
+                            states = states,
                             parameters = c(parameter_1, parameter_2),
                             collect = TRUE)
   parameter_1_data <- all_data %>%

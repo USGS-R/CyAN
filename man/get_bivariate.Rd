@@ -6,7 +6,8 @@
 \usage{
 get_bivariate(cyan_connection, parameter_1, parameter_2,
   north_latitude = NULL, south_latitude = NULL,
-  west_longitude = NULL, east_longitude = NULL, years = NULL)
+  west_longitude = NULL, east_longitude = NULL, years = NULL,
+  states = NULL)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan}}
@@ -24,6 +25,10 @@ should be given as a negative number of decimal degrees west of the prime
 meridian.}
 
 \item{years}{numeric vector of years that will be included in the query}
+
+\item{states}{a character vector of the postal codes for the states to be
+included in the query. Usually, this would not be used if querying by
+latitude and longitude.}
 }
 \value{
 if collect is FALSE, the query will be generated, but not collected.
