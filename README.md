@@ -5,10 +5,24 @@ This package provides a set of tools for working with the database developed for
 
 ## Installation
 
-To use the CyAN package, you should be using R 3.5+. You can install the package from GitHub using the `devtools` package. (For help installing `devtools`, see the [devtools page](https://github.com/r-lib/devtools) under "Installation".)
+To use the CyAN package, you should be using R 3.5+. You can install the package from GitHub using the `devtools` package. (For help installing `devtools`, see the [devtools page](https://github.com/r-lib/devtools) under "Installation"). To build the vignette (long-form documentation) included with the package, you'll need the `knitr` and `markdown` libraries installed.
+
+To install all 3 packages:
+
+```r
+install.packages(c("devtools", "knitr", "rmarkdown"))
+```
+
+Then to install the package with vignettes:
 
 ```r
 devtools::install_github("USGS-R/CyAN", build_vignettes = TRUE)
+```
+
+Or to install the package without the vignette:
+
+```r
+devtools::install_github("USGS-R/CyAN")
 ```
 
 ## Using the package
