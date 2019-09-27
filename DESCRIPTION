@@ -2,8 +2,10 @@ Package: CyAN
 Type: Package
 Title: Interact with CyAN data
 Version: 0.0.0.9300
-Author: Patrick Eslick <peslick@usgs.gov>
-Maintainer: Patrick Eslick <peslick@usgs.gov>
+Authors@R: c(
+    person("Patrick", "Eslick", role = c("aut","cre"),
+      email = "peslick@usgs.gov",
+      comment=c(ORCID="0000-0003-2611-6012")))
 Description: Tools for downloading, querying, and plotting data compiled for the
     Cyanobacteria Assessment Network (CyAN).
 Imports:
@@ -29,3 +31,4 @@ Suggests: remotes,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+BugReports: https://github.com/USGS-R/CyAN/issues
