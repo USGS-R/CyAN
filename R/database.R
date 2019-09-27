@@ -47,8 +47,6 @@ connect_cyan <- function(path) {
 #' #Generate the location index
 #' location_index <- generate_location_index(db_connection)
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 #'
 
@@ -57,21 +55,20 @@ generate_location_index <- function(cyan_connection) {
   LOCATION_ID <- LOCATION_NAME <- LATITUDE <- LONGITUDE <-
     ACTIVITY_ID <- PARAMETER_ID <- ".dplyr.var"
 
-  location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
-    dplyr::select(LOCATION_ID, LOCATION_NAME, LATITUDE, LONGITUDE)
-  activity <- dplyr::tbl(cyan_connection, "ACTIVITY") %>%
-    dplyr::select(LOCATION_ID, ACTIVITY_ID)
-  result <- dplyr::tbl(cyan_connection, "RESULT") %>%
-    dplyr::select(ACTIVITY_ID, PARAMETER_ID)
+  location <- dplyr::tbl(cyan_connection, "LOCATION")
+  location <- dplyr::select(location, LOCATION_ID, LOCATION_NAME, LATITUDE, LONGITUDE)
+  activity <- dplyr::tbl(cyan_connection, "ACTIVITY")
+  activity <- dplyr::select(activity, LOCATION_ID, ACTIVITY_ID)
+  result <- dplyr::tbl(cyan_connection, "RESULT")
+  result <- dplyr::select(result, ACTIVITY_ID, PARAMETER_ID)
 
-  location_index <- location %>%
-    dplyr::inner_join(activity, by = "LOCATION_ID") %>%
-    dplyr::inner_join(result, by = "ACTIVITY_ID") %>%
-    dplyr::select(LOCATION_ID, PARAMETER_ID) %>%
-    dplyr::distinct() %>%
-    dplyr::left_join(location, by = "LOCATION_ID") %>%
-    dplyr::select(LOCATION_NAME, LATITUDE, LONGITUDE, PARAMETER_ID) %>%
-    dplyr::collect()
+  location_index <- dplyr::inner_join(location, activity, by = "LOCATION_ID")
+  location_index <- dplyr::inner_join(location_index, result, by = "ACTIVITY_ID")
+  location_index <- dplyr::select(location_index, LOCATION_ID, PARAMETER_ID)
+  location_index <- dplyr::distinct(location_index)
+  location_index <- dplyr::left_join(location_index, location, by = "LOCATION_ID")
+  location_index <- dplyr::select(location_index, LOCATION_NAME, LATITUDE, LONGITUDE, PARAMETER_ID)
+  location_index <- dplyr::collect(location_index)
 
   return(location_index)
 
@@ -95,23 +92,22 @@ generate_location_index <- function(cyan_connection) {
 #' #Limit the index to the parameters that have data
 #' parameter_index_hasdata <- generate_parameter_index(db_connection, has_data = TRUE)
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 generate_parameter_index <- function(cyan_connection, has_data = FALSE) {
 
   PARAMETER_ID <- SHORT_NAME <- ".dplyr.var"
 
-  parameter_list <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
-    dplyr::select(PARAMETER_ID, SHORT_NAME) %>%
-    dplyr::collect()
+  parameter_list <- dplyr::tbl(cyan_connection, "PARAMETER")
+  parameter_list <- dplyr::select(parameter_list, PARAMETER_ID, SHORT_NAME)
+  parameter_list <- dplyr::collect(parameter_list)
+
   if(has_data) {
-    parameter_index <- dplyr::tbl(cyan_connection, "RESULT") %>%
-      dplyr::select(PARAMETER_ID) %>%
-      dplyr::distinct() %>%
-      dplyr::collect() %>%
-      inner_join(parameter_list, by = "PARAMETER_ID")
+    parameter_index <- dplyr::tbl(cyan_connection, "RESULT")
+    parameter_index <- dplyr::select(parameter_index, PARAMETER_ID)
+    parameter_index <- dplyr::distinct(parameter_index)
+    parameter_index <- dplyr::collect(parameter_index)
+    parameter_index <- inner_join(parameter_index, parameter_list, by = "PARAMETER_ID")
   } else {
     parameter_index <- parameter_list
   }
@@ -172,9 +168,6 @@ generate_parameter_index <- function(cyan_connection, has_data = FALSE) {
 #'                            years = 2017:2018,
 #'                            parameters = "P0051")
 #'
-#'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 get_cyan_data <- function(cyan_connection, collect = FALSE,
@@ -199,37 +192,43 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     WQP_COLLECTION_METHOD_CONTEXT <- WQP_COLLECTION_METHOD_NAME <- LOCATION_TYPE <-
     LOCAL_TZ <- STRFTIME <- SAMPLE_TYPE_DEFINITION <- YEAR <- WQP_ACTIVITY_ID <- ".dplyr.var"
 
-  location <- dplyr::tbl(cyan_connection, "LOCATION") %>%
-    dplyr::select(LOCATION_ID, LOCATION_TYPE, LATITUDE, LONGITUDE, DATUM, STATE_CODE, HUC,
-                  LOCATION_NAME, LOCAL_TZ)
+  location <- dplyr::tbl(cyan_connection, "LOCATION")
+  location <- dplyr::select(location,
+                            LOCATION_ID, LOCATION_TYPE, LATITUDE, LONGITUDE, DATUM, STATE_CODE, HUC,
+                            LOCATION_NAME, LOCAL_TZ)
 
-  activity <- dplyr::tbl(cyan_connection, "ACTIVITY") %>%
-    dplyr::select(ACTIVITY_ID, WQP_ACTIVITY_ID, START_DATE, START_TIME, END_DATE, END_TIME, TZ,
-                  LOCATION_ID, COLLECTION_METHOD_ID, SAMPLE_TYPE_CODE, ACTIVITY_DEPTH,
-                  ACTIVITY_DEPTH_UNIT, ACTIVITY_TOP_DEPTH, ACTIVITY_TOP_DEPTH_UNIT,
-                  ACTIVITY_BOTTOM_DEPTH, ACTIVITY_BOTTOM_DEPTH_UNIT,
-                  ACTIVITY_DEPTH_REFERENCE, ACTIVITY_COMMENT) %>%
-    dplyr::mutate(YEAR = as.numeric(STRFTIME('%Y', START_DATE)))
+  activity <- dplyr::tbl(cyan_connection, "ACTIVITY")
+  activity <- dplyr::select(activity,
+                            ACTIVITY_ID, WQP_ACTIVITY_ID, START_DATE, START_TIME, END_DATE, END_TIME, TZ,
+                            LOCATION_ID, COLLECTION_METHOD_ID, SAMPLE_TYPE_CODE, ACTIVITY_DEPTH,
+                            ACTIVITY_DEPTH_UNIT, ACTIVITY_TOP_DEPTH, ACTIVITY_TOP_DEPTH_UNIT,
+                            ACTIVITY_BOTTOM_DEPTH, ACTIVITY_BOTTOM_DEPTH_UNIT,
+                            ACTIVITY_DEPTH_REFERENCE, ACTIVITY_COMMENT)
+  activity <- dplyr::mutate(activity,
+                            YEAR = as.numeric(STRFTIME('%Y', START_DATE)))
 
-  result <- dplyr::tbl(cyan_connection, "RESULT") %>%
-    dplyr::select(RESULT_ID, ACTIVITY_ID, PARAMETER_ID, METHOD_ID, RESULT_DEPTH,
-                  RESULT_DEPTH_UNIT, RESULT_DEPTH_REFERENCE, QUALIFIER,
-                  RESULT_VALUE, DETECTION_LIMIT_VALUE, DETECTION_LIMIT_UNIT,
-                  DETECTION_LIMIT_TYPE, CROSSWALK_ID)
+  result <- dplyr::tbl(cyan_connection, "RESULT")
+  result <- dplyr::select(result,
+                          RESULT_ID, ACTIVITY_ID, PARAMETER_ID, METHOD_ID, RESULT_DEPTH,
+                          RESULT_DEPTH_UNIT, RESULT_DEPTH_REFERENCE, QUALIFIER,
+                          RESULT_VALUE, DETECTION_LIMIT_VALUE, DETECTION_LIMIT_UNIT,
+                          DETECTION_LIMIT_TYPE, CROSSWALK_ID)
 
-  parameter <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
-    dplyr::select(PARAMETER_ID, PARAMETER_NAME, UNITS)
+  parameter <- dplyr::tbl(cyan_connection, "PARAMETER")
+  parameter <- dplyr::select(parameter, PARAMETER_ID, PARAMETER_NAME, UNITS)
 
-  method <- dplyr::tbl(cyan_connection, "METHOD") %>%
-    dplyr::select(METHOD_ID, WQP_METHOD_IDENTIFIER, WQP_METHOD_CONTEXT, WQP_METHOD_NAME,
-                  WQP_METHOD_DESCRIPTION)
+  method <- dplyr::tbl(cyan_connection, "METHOD")
+  method <- dplyr::select(method,
+                          METHOD_ID, WQP_METHOD_IDENTIFIER, WQP_METHOD_CONTEXT, WQP_METHOD_NAME,
+                          WQP_METHOD_DESCRIPTION)
 
-  sample_type <- dplyr::tbl(cyan_connection, "SAMPLE_TYPE") %>%
-    dplyr::select(SAMPLE_TYPE_CODE, SAMPLE_TYPE_DEFINITION)
+  sample_type <- dplyr::tbl(cyan_connection, "SAMPLE_TYPE")
+  sample_type <- dplyr::select(sample_type, SAMPLE_TYPE_CODE, SAMPLE_TYPE_DEFINITION)
 
-  collection_method <- dplyr::tbl(cyan_connection, "COLLECTION_METHOD") %>%
-    dplyr::select(COLLECTION_METHOD_ID, WQP_COLLECTION_METHOD_ID,
-                  WQP_COLLECTION_METHOD_CONTEXT, WQP_COLLECTION_METHOD_NAME)
+  collection_method <- dplyr::tbl(cyan_connection, "COLLECTION_METHOD")
+  collection_method <- dplyr::select(collection_method,
+                                     COLLECTION_METHOD_ID, WQP_COLLECTION_METHOD_ID,
+                                     WQP_COLLECTION_METHOD_CONTEXT, WQP_COLLECTION_METHOD_NAME)
 
   if(!(is.null(north_latitude))) {
 
@@ -289,7 +288,7 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 
   }
   if(!(is.null(parameters))) {
-    valid_parms <- parameter %>% dplyr::pull(PARAMETER_ID)
+    valid_parms <- dplyr::pull(parameter, PARAMETER_ID)
     if(!all(parameters %in% valid_parms)) {
       invalid <- paste(parameters[!(parameters %in% valid_parms)], collapse = " ")
       stop(paste(invalid, "not valid parameter_ids"))
@@ -324,15 +323,20 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
     collection_method <- dplyr::collect(collection_method)
   }
 
-  output <- location %>%
-    dplyr::inner_join(activity, by = "LOCATION_ID", suffix = c(".LOCATION", ".ACTIVITY")) %>%
-    dplyr::inner_join(result, by = "ACTIVITY_ID", suffix = c(".ACTIVITY", ".RESULT")) %>%
-    dplyr::inner_join(parameter, by = "PARAMETER_ID", suffix = c(".RESULT", ".PARAMETER")) %>%
-    dplyr::inner_join(method, by = "METHOD_ID", suffix = c(".PARAMETER", ".METHOD")) %>%
-    dplyr::inner_join(sample_type, by = "SAMPLE_TYPE_CODE",
-                      suffix = c(".METHOD", ".SAMPLE_TYPE")) %>%
-    dplyr::inner_join(collection_method, by = "COLLECTION_METHOD_ID",
-                      suffix = c(".SAMPLE_TYPE", "COLLECTION_METHOD"))
+  output <- dplyr::inner_join(location, activity,
+                              by = "LOCATION_ID", suffix = c(".LOCATION", ".ACTIVITY"))
+  output <- dplyr::inner_join(output, result,
+                              by = "ACTIVITY_ID", suffix = c(".ACTIVITY", ".RESULT"))
+  output <- dplyr::inner_join(output, parameter,
+                              by = "PARAMETER_ID", suffix = c(".RESULT", ".PARAMETER"))
+  output <- dplyr::inner_join(output, method,
+                              by = "METHOD_ID", suffix = c(".PARAMETER", ".METHOD"))
+  output <- dplyr::inner_join(output, sample_type,
+                              by = "SAMPLE_TYPE_CODE",
+                              suffix = c(".METHOD", ".SAMPLE_TYPE"))
+  output <- dplyr::inner_join(output, collection_method,
+                              by = "COLLECTION_METHOD_ID",
+                              suffix = c(".SAMPLE_TYPE", "COLLECTION_METHOD"))
 
   return(output)
 
@@ -378,8 +382,6 @@ get_cyan_data <- function(cyan_connection, collect = FALSE,
 #'                                  north_latitude = 37.818, south_latitude = 37.714,
 #'                                  west_longitude = -98.028, east_longitude = -97.735)
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
@@ -397,10 +399,9 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
                             states = states,
                             parameters = c(parameter_1, parameter_2),
                             collect = TRUE)
-  parameter_1_data <- all_data %>%
-    dplyr::filter(PARAMETER_ID == parameter_1)
-  parameter_2_data <- all_data %>%
-    dplyr::filter(PARAMETER_ID == parameter_2)
+
+  parameter_1_data <- dplyr::filter(all_data, PARAMETER_ID == parameter_1)
+  parameter_2_data <- dplyr::filter(all_data, PARAMETER_ID == parameter_2)
 
   join_by <- names(all_data)[!(names(all_data) %in%
                                  c("RESULT_ID","PARAMETER_ID","METHOD_ID",
@@ -430,8 +431,6 @@ get_bivariate <- function(cyan_connection, parameter_1, parameter_2,
 #'
 #' @return cyan_data with an additional character column for time in GMT
 #'
-#' @importFrom magrittr %>%
-#'
 #' @examples
 #' #Connect to the example database bundled with CyAN
 #' path <- system.file("extdata", "example.db", package = "CyAN")
@@ -455,8 +454,7 @@ add_GMT_time <- function(cyan_data) {
 
   START_DATE <- START_TIME <- datetime <- ".dplyr.var"
 
-  output <- cyan_data %>%
-    dplyr::mutate(datetime = paste(START_DATE, START_TIME))
+  output <- dplyr::mutate(cyan_data, datetime = paste(START_DATE, START_TIME))
 
   timezone <- output$TZ
   state <- output$STATE_CODE
@@ -577,8 +575,6 @@ add_solar_noon <- function(cyan_data) {
 #' #Add trophic status columns
 #' ks_chl_2016_wtrophic <- add_trophic_status(ks_chl_2016)
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 add_trophic_status <- function(cyan_data) {
@@ -646,8 +642,6 @@ add_trophic_status <- function(cyan_data) {
 #' #Add any applicable WHO categories
 #' ks_chl_2016_wWHO <- add_WHO_category(ks_chl_2016)
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 #'
 
@@ -668,9 +662,8 @@ add_WHO_category <- function(cyan_data) {
   cat <- vector(mode = "numeric", length = length(parm))
 
   for(i in seq_along(parm)) {
-    cat_i <- who_cat %>%
-      dplyr::filter(parameter == parm[i], lower_bound <= value[i], upper_bound > value[i]) %>%
-      dplyr::pull(category)
+    cat_i <- dplyr::filter(who_cat, parameter == parm[i], lower_bound <= value[i], upper_bound > value[i])
+    cat_i <- dplyr::pull(cat_i, category)
     if(length(cat_i) != 1)
       cat_i <- NA
     cat[i] <- cat_i
@@ -704,8 +697,6 @@ add_WHO_category <- function(cyan_data) {
 #'
 #' #Add any applicable recreational for toxins
 #' ks_toxins_wEPA <- add_EPA_recreational_threshold(ks_toxins)
-#'
-#' @importFrom magrittr %>%
 #'
 #' @export
 #'

@@ -11,26 +11,23 @@
 #'
 #' @return a table of all results that have been flagged with the specified flag code
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 find_flagged_data <- function(cyan_connection, flag_code, collect = TRUE) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
-  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS") %>%
-    dplyr::filter(FLAG_CODE == flag_code) %>%
-    dplyr::pull(RESULT_ID)
+  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS")
+  flags <- dplyr::filter(flags, FLAG_CODE == flag_code)
+  flags <- dplyr::pull(flags, RESULT_ID)
 
-  result <- dplyr::tbl(cyan_connection, "RESULT") %>%
-    dplyr::filter(RESULT_ID %in% flags)
+  result <- dplyr::tbl(cyan_connection, "RESULT")
+  result <- dplyr::filter(result, RESULT_ID %in% flags)
   activity <- dplyr::tbl(cyan_connection, "ACTIVITY")
   location <- dplyr::tbl(cyan_connection, "LOCATION")
 
-  output <- result %>%
-    inner_join(activity) %>%
-    inner_join(location)
+  output <- inner_join(result, activity)
+  output <- inner_join(output, location)
 
   if(collect)
     output <- collect(output)
@@ -48,17 +45,15 @@ find_flagged_data <- function(cyan_connection, flag_code, collect = TRUE) {
 #'
 #' @return a vector of result identifiers
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 find_flagged <- function(cyan_connection, flag_code) {
 
   FLAG_CODE <- RESULT_ID <- ".dplyr.var"
 
-  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS") %>%
-    dplyr::filter(FLAG_CODE == flag_code) %>%
-    dplyr::pull(RESULT_ID)
+  flags <- dplyr::tbl(cyan_connection, "QC_FLAGS")
+  flags <- dplyr::filter(flags, FLAG_CODE == flag_code)
+  flags <- dplyr::pull(flags, RESULT_ID)
 
   return(flags)
 }
@@ -75,8 +70,6 @@ find_flagged <- function(cyan_connection, flag_code) {
 #'
 #' @return a logical indicating whether the flags were succesfully written
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 #'
 
@@ -84,14 +77,14 @@ apply_flags <- function(cyan_connection, flag_code, initials, results) {
 
   FLAG_CODE <- FLAG_ID <- ".dplyr.var"
 
-  defined_flags <- dplyr::tbl(cyan_connection, "FLAG_KEY") %>%
-    pull(FLAG_CODE)
+  defined_flags <- dplyr::tbl(cyan_connection, "FLAG_KEY")
+  defined_flags <- pull(defined_flags, FLAG_CODE)
 
   if(!(flag_code %in% defined_flags))
     stop(paste(flag_code, "not defined in the database"))
 
-  ids <- dplyr::tbl(cyan_connection, "QC_FLAGS") %>%
-    dplyr::pull(FLAG_ID)
+  ids <- dplyr::tbl(cyan_connection, "QC_FLAGS")
+  ids <- dplyr::pull(ids, FLAG_ID)
   if(length(ids) == 0) {
     max_key <- 0
   } else {
@@ -121,8 +114,6 @@ apply_flags <- function(cyan_connection, flag_code, initials, results) {
 #' @param results the result identifiers to remove the given flag from
 #'
 #' @return a numeric vector indicating the number of flags deleted for each result
-#'
-#' @importFrom magrittr %>%
 #'
 #' @export
 #'
