@@ -18,8 +18,6 @@
 #'
 #' @return a ggplot2 plot
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 
 plot_bivariate <- function(plot_data,
@@ -82,16 +80,14 @@ plot_bivariate <- function(plot_data,
   if(log_1) {
     if(any(plot_data$RESULT_VALUE.1 <= 0, na.rm = TRUE)) {
       message("Removing values of parameter 1 that are 0 or less")
-      plot_data <- plot_data %>%
-        dplyr::filter(RESULT_VALUE.1 > 0)
+      plot_data <- dplyr::filter(plot_data, RESULT_VALUE.1 > 0)
     }
   }
 
   if(log_2) {
     if(any(plot_data$RESULT_VALUE.2 <= 0, na.rm = TRUE)) {
       message("Removing values of parameter 2 that are 0 or less")
-      plot_data <- plot_data %>%
-        dplyr::filter(RESULT_VALUE.2 > 0)
+      plot_data <- dplyr::filter(plot_data, RESULT_VALUE.2 > 0)
     }
   }
 

@@ -69,5 +69,4 @@ chla_2017 <- get_cyan_data(db_connection,
                            years = 2017:2018,
                            parameters = "P0051")
 
-
 }

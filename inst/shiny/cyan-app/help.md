@@ -15,7 +15,7 @@ The app should launch in your default web browser. The app was developed using t
 
 ## Configure
 
-To use most of the functions of the app, you will need to connect the app to your copy of the CyAN database. Click the "Database file" button and navigate to the CyAN.db file (see Introduction for information on getting this database). 
+To use most of the functions of the app, you will need to connect the app to your copy of the CyAN database. Click the "Database file" button and navigate to the CyAN.db file (see Introduction for information on getting this database). Alternatively, you can load the example data by checking the box. The example data includes a limited dataset from Cheney Reservoir in south central Kansas. It is meant only to demonstrate the functionality of this app. Make sure to uncheck this box when you're ready to use another database.
 
 ## Map
 

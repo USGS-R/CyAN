@@ -51,7 +51,8 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = "db_configuration",
         h3("Connect to database"),
-        shinyFilesButton('db_file', label = "Database file", title = "CyAN Database", multiple = FALSE)
+        shinyFilesButton('db_file', label = "Database file", title = "CyAN Database", multiple = FALSE),
+        checkboxInput("db_example_file", label = "Or load example data", value = FALSE)
       ),
       tabItem(tabName = "map_screen",
         div(class = "outer",
@@ -166,7 +167,18 @@ server <- function(input, output) {
   shinyFileChoose(input, "db_file", filetypes = c("", "db"), roots = volumes)
 
   db_path <- reactive({
-    parseFilePaths(volumes, input$db_file)
+    if(input$db_example_file) {
+      path <- system.file("extdata", "example.db", package = "CyAN")
+      if(!file.exists(path)) {
+        showNotification("Example data not found, try re-installing the package", duration = 10, type = "error")
+        db_path <- data.frame()
+      } else {
+        db_path <- data.frame(datapath = path, stringsAsFactors = FALSE)
+      }
+    } else {
+      db_path <- parseFilePaths(volumes, input$db_file)
+    }
+    return(db_path)
   })
 
   cyan_connection <- reactive({
@@ -176,7 +188,9 @@ server <- function(input, output) {
       return(NULL)
 
     db_path <- file$datapath
+    print(db_path)
     cyan <- connect_cyan(db_path)
+    showNotification("Connected!", type = "message", duration = 5)
     cyan
   })
 
@@ -184,8 +198,10 @@ server <- function(input, output) {
 
     if(is.null(cyan_connection()))
       return(NULL)
-
-    parameters <- generate_parameter_index(cyan_connection())
+    parm_notification <- showNotification("Indexing parameters...", duration = NULL)
+    parameters <- generate_parameter_index(cyan_connection(), has_data = TRUE)
+    removeNotification(parm_notification)
+    showNotification("Finished!", duration = 5)
     parameters
 
   })
@@ -194,10 +210,10 @@ server <- function(input, output) {
     if(is.null(cyan_connection()))
       return(data.frame(LOCATION_NAME = "N/A", LATITUDE = 0, LONGITUDE = 0, PARAMETER_ID = "P0001"))
 
-    loc_notification <- showNotification("Indexing database...", duration = NULL)
+    loc_notification <- showNotification("Indexing database locations...", duration = NULL)
     locations <- generate_location_index(cyan_connection())
     removeNotification(loc_notification)
-
+    showNotification("Finished!", duration = 5)
     locations
   })
 
