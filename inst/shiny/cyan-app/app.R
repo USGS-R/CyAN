@@ -198,8 +198,10 @@ server <- function(input, output) {
 
     if(is.null(cyan_connection()))
       return(NULL)
-
-    parameters <- generate_parameter_index(cyan_connection())
+    parm_notification <- showNotification("Indexing parameters...", duration = NULL)
+    parameters <- generate_parameter_index(cyan_connection(), has_data = TRUE)
+    removeNotification(parm_notification)
+    showNotification("Finished!", duration = 5)
     parameters
 
   })
@@ -208,7 +210,7 @@ server <- function(input, output) {
     if(is.null(cyan_connection()))
       return(data.frame(LOCATION_NAME = "N/A", LATITUDE = 0, LONGITUDE = 0, PARAMETER_ID = "P0001"))
 
-    loc_notification <- showNotification("Indexing database...", duration = NULL)
+    loc_notification <- showNotification("Indexing database locations...", duration = NULL)
     locations <- generate_location_index(cyan_connection())
     removeNotification(loc_notification)
     showNotification("Finished!", duration = 5)

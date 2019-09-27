@@ -80,6 +80,8 @@ generate_location_index <- function(cyan_connection) {
 #' Generate a table of parameter identifiers and their short names
 #'
 #' @param cyan_connection a CyAN database connection from \code{connect_cyan()}
+#' @param has_data a logical indicating whether to limit the parameter list to only
+#' those parameters that have data populated in the database
 #'
 #' @return a data frame of parameter identifiers and their associated
 #' short names
@@ -90,18 +92,29 @@ generate_location_index <- function(cyan_connection) {
 #' db_connection <- connect_cyan(path)
 #' #Generate the parameter index
 #' parameter_index <- generate_parameter_index(db_connection)
+#' #Limit the index to the parameters that have data
+#' parameter_index_hasdata <- generate_parameter_index(db_connection, has_data = TRUE)
 #'
 #' @importFrom magrittr %>%
 #'
 #' @export
 
-generate_parameter_index <- function(cyan_connection) {
+generate_parameter_index <- function(cyan_connection, has_data = FALSE) {
 
   PARAMETER_ID <- SHORT_NAME <- ".dplyr.var"
 
-  parameter_index <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
+  parameter_list <- dplyr::tbl(cyan_connection, "PARAMETER") %>%
     dplyr::select(PARAMETER_ID, SHORT_NAME) %>%
     dplyr::collect()
+  if(has_data) {
+    parameter_index <- dplyr::tbl(cyan_connection, "RESULT") %>%
+      dplyr::select(PARAMETER_ID) %>%
+      dplyr::distinct() %>%
+      dplyr::collect() %>%
+      inner_join(parameter_list, by = "PARAMETER_ID")
+  } else {
+    parameter_index <- parameter_list
+  }
 
   return(parameter_index)
 

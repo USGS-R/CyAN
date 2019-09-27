@@ -4,10 +4,13 @@
 \alias{generate_parameter_index}
 \title{Generate a table of parameter identifiers and their short names}
 \usage{
-generate_parameter_index(cyan_connection)
+generate_parameter_index(cyan_connection, has_data = FALSE)
 }
 \arguments{
 \item{cyan_connection}{a CyAN database connection from \code{connect_cyan()}}
+
+\item{has_data}{a logical indicating whether to limit the parameter list to only
+those parameters that have data populated in the database}
 }
 \value{
 a data frame of parameter identifiers and their associated
@@ -22,5 +25,7 @@ path <- system.file("extdata", "example.db", package = "CyAN")
 db_connection <- connect_cyan(path)
 #Generate the parameter index
 parameter_index <- generate_parameter_index(db_connection)
+#Limit the index to the parameters that have data
+parameter_index_hasdata <- generate_parameter_index(db_connection, has_data = TRUE)
 
 }
