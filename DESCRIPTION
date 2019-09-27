@@ -1,7 +1,7 @@
 Package: CyAN
 Type: Package
 Title: Interact with CyAN data
-Version: 0.0.0.9300
+Version: 0.0.0.9400
 Authors@R: c(
     person("Patrick", "Eslick", role = c("aut","cre"),
       email = "peslick@usgs.gov",
